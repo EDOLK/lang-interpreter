@@ -1,0 +1,14 @@
+*.class
+
+*.jar
+*.war
+*.ear
+
+/target/
+pom.xml.tag
+pom.xml.versions
+pom.xml.bak
+/.mvn/
+/.settings/
+.classpath
+.project
