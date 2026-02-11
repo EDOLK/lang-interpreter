@@ -3,13 +3,13 @@ Statically typed.
 
 #### Timeline:
 * 02/18:
-* Initialize and set primitives
-* Basic arithmetic
+    * Initialize and set primitives
+    * Basic arithmetic
 * 02/25:
-* Initialize and set functions, tables, arrays
+    * Initialize and set functions, tables, arrays
 * 03/04:
-* Basic control flow (if, if-else, while and for loops)
-    * 03/11:
+    * Basic control flow (if, if-else, while and for loops)
+* 03/11:
     * "main" method, read stdin, write to stdout
 ...
 
