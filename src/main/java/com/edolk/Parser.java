@@ -124,7 +124,7 @@ public class Parser {
     }
 
     private ParseError error(Token token, String message) {
-        Interpreter.error(token, message);
+        Engine.error(token, message);
         return new ParseError();
     }
 

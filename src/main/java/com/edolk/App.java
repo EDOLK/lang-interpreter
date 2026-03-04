@@ -7,6 +7,6 @@ import java.io.IOException;
  */
 public class App {
     public static void main(String[] args) throws IOException {
-        Interpreter.main(args);
+        Engine.main(args);
     }
 }
