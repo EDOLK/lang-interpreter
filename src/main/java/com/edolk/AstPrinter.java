@@ -1,6 +1,7 @@
 package com.edolk;
 
 import com.edolk.Expr.Assign;
+import com.edolk.Expr.Call;
 import com.edolk.Expr.Logical;
 import com.edolk.Expr.Variable;
 
@@ -59,5 +60,10 @@ public class AstPrinter implements Expr.Visitor<String> {
     public String visitLogicalExpr(Logical expr) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visitLogicalExpr'");
+    }
+    @Override
+    public String visitCallExpr(Call expr) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'visitCallExpr'");
     }
 }
