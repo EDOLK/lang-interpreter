@@ -1,55 +1,18 @@
-A general purpose interpreted programming language. Interpreter written in java.
-Statically typed.
 
-#### Timeline:
-* 02/18:
-    * Initialize and set primitives
-    * Basic arithmetic
-* 02/25:
-    * Initialize and set functions, tables, arrays
-* 03/04:
-    * Basic control flow (if, if-else, while and for loops)
-* 03/11:
-    * "main" method, read stdin, write to stdout
-...
 
-#### example code:
-```
-declaring primitives
-uint32 x;
-uint64 y = 12;
-string name = "joe";
+Fog is a batteries included functional language for data analysis and manipulation. Based on a modified version of [Lox](https://craftinginterpreters.com/) from the book Crafting Interpreters by Robert Nystrom.
 
-functions:
-can be defined using a signature:
-function name(type argument, type argument, ...) : return type
-can be bound in tables like regular values
+The purpose of the language is to be able to quickly and efficiently do common statistical operations on various data structures, focusing on structures common to relational databases like data tables, while minimizing overhead. Fog scripts should be easy to write and execute, without complex dependency management or excessive amounts of boilerplate.
 
-function add(uint32, uint32) : uint32 = (x, y) {
-   return x + y;
-}
+### TODO:
 
-print(add(5, 12));
-
-function addEmpty(uint32, uint32) : uint32;
-
-addEmpty = (x, y) {
-    return x + y;
-}
-
-tables:
-string to value map with unique keys
-all keys are either public or private (private by default)
-
-table person = {
-    uint32 age = 30;
-    string name = "john";
-    public function doSomething() : void;
-    public function sayHello() : void = () {
-        print("hello");
-    }
-}
-
-person.sayHello();
-```
+ - [X] Abstract Syntax Tree Generator and Interpreter
+ - [X] Variables, Lexical Binding, Local/Global Environments
+ - [X] Control Flow (If,If-Else,For,While loops)
+ - [X] Function Calls and Definitions
+ - [ ] Classes & Objects
+ - [ ] Common Data Structures (Lists, Sets, Tables, Etc) & Relevant methods
+ - [ ] Native functions for common statistical operations (mean, median, mode, etc)
+ - [ ] Data table data structure, importing csv/powerpoint
+ - [ ] Operations for Data tables, Pipe operator
 
