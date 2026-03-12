@@ -36,7 +36,6 @@ public class Function implements Callable {
             if (isInitializer) return closure.getAt(0, "this");
             return returnValue.value;
         }
-        interpreter.executeBlock(declaration.body, environment);
         if (isInitializer) return closure.getAt(0, "this");
         return null;
     }
