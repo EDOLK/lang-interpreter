@@ -8,7 +8,6 @@ import java.util.Stack;
 import com.edolk.Expr.Assign;
 import com.edolk.Expr.Binary;
 import com.edolk.Expr.Call;
-import com.edolk.Expr.FunctionLiteral;
 import com.edolk.Expr.Grouping;
 import com.edolk.Expr.Literal;
 import com.edolk.Expr.Logical;
@@ -26,6 +25,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private final Interpreter interpreter;
+    private Stack<Stmt.Function> functionStmtStack = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
     private ClassType currentClass = ClassType.NONE;
 
@@ -106,7 +106,9 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             Stmt.Function function, FunctionType type) {
         FunctionType enclosingFunction = currentFunction;
         currentFunction = type;
+        functionStmtStack.push(function);
         visitFunctionLiteralExpr(function.literal);
+        functionStmtStack.pop();
         currentFunction = enclosingFunction;
     }
 
@@ -171,9 +173,14 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionLiteralExpr(Expr.FunctionLiteral function) {
-        if (currentFunction == FunctionType.NONE) {
+        FunctionType enclosingFunction = null;
+        if (functionStmtStack.peek().literal != function) {
+            enclosingFunction = currentFunction;
             currentFunction = FunctionType.FUNCTION;
         }
+        // System.out.println("literal: " + function);
+        // System.out.println("current: " + currentFunction);
+        // System.out.println("enclosing: " + enclosingFunction);
         beginScope();
         for (Token param : function.params) {
             declare(param);
@@ -181,6 +188,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
         resolve(function.body);
         endScope();
+        if (enclosingFunction != null)
+            currentFunction = enclosingFunction;
         return null;
     }
 
@@ -275,8 +284,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             }
         }
     }
-    private enum FunctionType {
-        NONE, FUNCTION, METHOD, INITIALIZER,
+    public enum FunctionType {
+        NONE, FUNCTION, METHOD, INITIALIZER, ANONYMOUS
     }
 
     private enum ClassType {
