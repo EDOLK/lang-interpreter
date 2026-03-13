@@ -8,6 +8,7 @@ import java.util.Stack;
 import com.edolk.Expr.Assign;
 import com.edolk.Expr.Binary;
 import com.edolk.Expr.Call;
+import com.edolk.Expr.FunctionLiteral;
 import com.edolk.Expr.Grouping;
 import com.edolk.Expr.Literal;
 import com.edolk.Expr.Logical;
@@ -105,14 +106,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             Stmt.Function function, FunctionType type) {
         FunctionType enclosingFunction = currentFunction;
         currentFunction = type;
-
-        beginScope();
-        for (Token param : function.params) {
-            declare(param);
-            define(param);
-        }
-        resolve(function.body);
-        endScope();
+        visitFunctionLiteralExpr(function.literal);
         currentFunction = enclosingFunction;
     }
 
@@ -170,6 +164,23 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitWhileStmt(While stmt) {
         resolve(stmt.condition);
         resolve(stmt.body);
+        return null;
+    }
+
+    // TODO: keep an eye on this as well
+
+    @Override
+    public Void visitFunctionLiteralExpr(Expr.FunctionLiteral function) {
+        if (currentFunction == FunctionType.NONE) {
+            currentFunction = FunctionType.FUNCTION;
+        }
+        beginScope();
+        for (Token param : function.params) {
+            declare(param);
+            define(param);
+        }
+        resolve(function.body);
+        endScope();
         return null;
     }
 

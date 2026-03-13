@@ -15,6 +15,7 @@ abstract class Expr {
     R visitThisExpr(This expr);
     R visitUnaryExpr(Unary expr);
     R visitVariableExpr(Variable expr);
+    R visitFunctionLiteralExpr(FunctionLiteral expr);
   }
   static class Assign extends Expr {
     Assign(Token name, Expr value) {
@@ -169,6 +170,20 @@ abstract class Expr {
     }
 
     final Token name;
+  }
+  static class FunctionLiteral extends Expr {
+    FunctionLiteral(List<Token> params, List<Stmt> body) {
+      this.params = params;
+      this.body = body;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitFunctionLiteralExpr(this);
+    }
+
+    final List<Token> params;
+    final List<Stmt> body;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

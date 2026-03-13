@@ -158,7 +158,11 @@ public class Parser {
 
     private Stmt.Function function(String kind) {
         Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
-        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        return new Stmt.Function(name, functionLiteral(kind));
+    }
+
+    private Expr.FunctionLiteral functionLiteral(String kind){
+        consume(TokenType.LEFT_PAREN, "Expect '(' before " + kind + " parameters.");
         List<Token> parameters = new ArrayList<>();
         if (!check(TokenType.RIGHT_PAREN)) {
             do {
@@ -173,7 +177,7 @@ public class Parser {
         consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
         consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
         List<Stmt> body = block();
-        return new Stmt.Function(name, parameters, body);
+        return new Expr.FunctionLiteral(parameters, body);
     }
 
     private List<Stmt> block() {
@@ -337,10 +341,44 @@ public class Parser {
             return new Expr.Variable(previous());
         }
 
+        // TODO: CHECK FOR ANONYMOUS FUNCTION HERE AND DIFFERENTIATE FROM GROUPING
+
         if (match(TokenType.LEFT_PAREN)) {
-            Expr expr = expression();
-            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
-            return new Expr.Grouping(expr);
+            int offset = 1;
+            List<Token> parenTokens = new ArrayList<>();
+            while(!match(TokenType.RIGHT_PAREN)) {
+                parenTokens.add(advance());
+                offset++;
+            }
+
+            if (check(TokenType.LEFT_BRACE)) {
+                // THIS IS AN ANONYMOUS FUNCTION
+                List<Token> parameters = new ArrayList<>();
+                boolean b = false;
+                for (Token token : parenTokens) {
+                    if (b) {
+                        if (token.type != TokenType.COMMA) {
+                            throw error(token, "Expect comma.");
+                        }
+                    } else {
+                        if (token.type != TokenType.IDENTIFIER) {
+                            throw error(token, "Expect parameter name.");
+                        } else {
+                            parameters.add(token);
+                        }
+                    }
+                    b = !b;
+                }
+                consume(TokenType.LEFT_BRACE, "Expect '{' before function body.");
+                List<Stmt> body = block();
+                return new Expr.FunctionLiteral(parameters, body);
+            } else {
+                // THIS IS A GROUPING
+                current -= offset;
+                Expr expr = expression();
+                consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+                return new Expr.Grouping(expr);
+            }
         }
 
         throw error(peek(), "Expect expression");

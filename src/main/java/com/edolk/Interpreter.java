@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.edolk.Expr.FunctionLiteral;
 import com.edolk.nativefuncs.Clock;
 import com.edolk.nativefuncs.Print;
 
@@ -42,29 +43,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     // Expressions
-
-    @Override
-    public Void visitExpressionStmt(Stmt.Expression stmt) {
-        evaluate(stmt.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitFunctionStmt(Stmt.Function stmt) {
-        Function function = new Function(stmt, environment, false);
-        environment.define(stmt.name.lexeme, function);
-        return null;
-    }
-
-    @Override
-    public Void visitIfStmt(Stmt.If stmt) {
-        if (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.thenBranch);
-        } else if (stmt.elseBranch != null) {
-            execute(stmt.elseBranch);
-        }
-        return null;
-    }
 
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
@@ -229,7 +207,37 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return value;
     }
 
+    @Override
+    public Object visitFunctionLiteralExpr(FunctionLiteral expr) {
+        Function function = new Function(expr, environment, false);
+        environment.define(expr.toString(), function);
+        return function;
+    }
+
     // Statements
+
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        Function function = new Function(stmt.name, stmt.literal, environment, false);
+        environment.define(stmt.name.lexeme, function);
+        return null;
+    }
+
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
@@ -269,8 +277,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         environment.define(stmt.name.lexeme, null);
         Map<String, Function> methods = new HashMap<>();
         for (Stmt.Function method : stmt.methods) {
-            Function function = new Function(method, environment,
-                    method.name.lexeme.equals("init"));
+            Function function = new Function(method.name, method.literal, environment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, function);
         }
 
