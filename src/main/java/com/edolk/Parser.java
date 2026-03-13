@@ -187,6 +187,10 @@ public class Parser {
         return statements;
     }
 
+    private Expr expression() {
+        return assignment();
+    }
+
     private Expr assignment() {
         Expr expr = or();
 
@@ -232,10 +236,6 @@ public class Parser {
         return expr;
     }
 
-    private Expr expression() {
-        return assignment();
-    }
-
     private Expr equality() {
         Expr expr = comparison();
         while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)){
@@ -245,32 +245,7 @@ public class Parser {
         }
         return expr;
     }
-    private boolean match(TokenType... types) {
-        for (TokenType type : types) {
-            if (check(type)) {
-                advance();
-                return true;
-            }
-        }
-        return false;
-    }
-    private boolean check(TokenType type) {
-        if (isAtEnd()) return false;
-        return peek().type == type;
-    }
-    private Token advance() {
-        if (!isAtEnd()) current++;
-        return previous();
-    }
-    private boolean isAtEnd() {
-        return peek().type == TokenType.EOF;
-    }
-    private Token peek() {
-        return tokens.get(current);
-    }
-    private Token previous() {
-        return tokens.get(current - 1);
-    }
+
     private Expr comparison() {
         Expr expr = term();
 
@@ -371,6 +346,40 @@ public class Parser {
         throw error(peek(), "Expect expression");
     }
 
+    // check if current token is of any TokenType types, if so, advance by one and return true, otherwise return false;
+    private boolean match(TokenType... types) {
+        for (TokenType type : types) {
+            if (check(type)) {
+                advance();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean check(TokenType type) {
+        if (isAtEnd()) return false;
+        return peek().type == type;
+    }
+
+    private Token advance() {
+        if (!isAtEnd()) current++;
+        return previous();
+    }
+
+    private boolean isAtEnd() {
+        return peek().type == TokenType.EOF;
+    }
+
+    private Token peek() {
+        return tokens.get(current);
+    }
+
+    private Token previous() {
+        return tokens.get(current - 1);
+    }
+
+    // check if current token is of TokenType type, if so, advance by one and return it, otherwise, throw error(message);
     private Token consume(TokenType type, String message) {
         if (check(type)) return advance();
 
