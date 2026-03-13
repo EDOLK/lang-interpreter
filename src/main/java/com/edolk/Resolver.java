@@ -17,7 +17,6 @@ import com.edolk.Stmt.Block;
 import com.edolk.Stmt.Expression;
 import com.edolk.Stmt.Function;
 import com.edolk.Stmt.If;
-import com.edolk.Stmt.Print;
 import com.edolk.Stmt.Return;
 import com.edolk.Stmt.Var;
 import com.edolk.Stmt.While;
@@ -122,12 +121,6 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         resolve(stmt.condition);
         resolve(stmt.thenBranch);
         if (stmt.elseBranch != null) resolve(stmt.elseBranch);
-        return null;
-    }
-
-    @Override
-    public Void visitPrintStmt(Print stmt) {
-        resolve(stmt.expression);
         return null;
     }
 
