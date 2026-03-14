@@ -158,7 +158,11 @@ public class Parser {
 
     private Stmt.Function function(String kind) {
         Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + " name.");
-        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        return new Stmt.Function(name, functionLiteral(kind));
+    }
+
+    private Expr.FunctionLiteral functionLiteral(String kind){
+        consume(TokenType.LEFT_PAREN, "Expect '(' before " + kind + " parameters.");
         List<Token> parameters = new ArrayList<>();
         if (!check(TokenType.RIGHT_PAREN)) {
             do {
@@ -173,7 +177,7 @@ public class Parser {
         consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
         consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.");
         List<Stmt> body = block();
-        return new Stmt.Function(name, parameters, body);
+        return new Expr.FunctionLiteral(parameters, body);
     }
 
     private List<Stmt> block() {
@@ -338,6 +342,22 @@ public class Parser {
         }
 
         if (match(TokenType.LEFT_PAREN)) {
+            int offset = 1;
+
+            while(!match(TokenType.RIGHT_PAREN)){
+                offset++;
+                advance();
+            }
+
+            boolean isFunction = check(TokenType.LEFT_BRACE);
+
+            current -= offset;
+
+            if (isFunction){
+                current--;
+                return functionLiteral("function");
+            }
+
             Expr expr = expression();
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
