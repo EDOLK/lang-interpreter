@@ -13,18 +13,21 @@ public class GenerateAst {
         }
         String outputDir = args[0];
         defineAst(outputDir, "Expr", Arrays.asList(
-            "Assign   : Token name, Expr value",
-            "Binary   : Expr left, Token operator, Expr right",
-            "Call     : Expr callee, Token paren, List<Expr> arguments",
-            "Get      : Expr object, Token name",
-            "Grouping : Expr expression",
-            "Literal  : Object value",
-            "Logical  : Expr left, Token operator, Expr right",
-            "Set      : Expr object, Token name, Expr value",
-            "This     : Token keyword",
-            "Unary    : Token operator, Expr right",
-            "Variable : Token name",
-            "FunctionLiteral : List<Token> params, List<Stmt> body"
+            "Assign          : Token name, Expr value",
+            "Binary          : Expr left, Token operator, Expr right",
+            "Call            : Expr callee, Token paren, List<Expr> arguments",
+            "Get             : Expr object, Token name",
+            "Grouping        : Expr expression",
+            "Literal         : Object value",
+            "Logical         : Expr left, Token operator, Expr right",
+            "Set             : Expr object, Token name, Expr value",
+            "This            : Token keyword",
+            "Unary           : Token operator, Expr right",
+            "Variable        : Token name",
+            "FunctionLiteral : List<Token> params, List<Stmt> body",
+            "ArrayLiteral    : List<Expr> elements, Token rightBracket, Expr sizeExpr",
+            "GetArray        : Expr array, Expr index, Token rightBracket",
+            "SetArray        : Expr array, Expr index, Token rightBracket, Expr value"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(

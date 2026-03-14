@@ -301,6 +301,15 @@ public class Parser {
                 Token name = consume(TokenType.IDENTIFIER,
                         "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
+            } else if (match(TokenType.LEFT_BRACKET)){
+                Expr indexExpr = expression();
+                Token rightBracket = consume(TokenType.RIGHT_BRACKET, 
+                        "Expect ']' after index.");
+                if (match(TokenType.EQUAL)) {
+                    expr = new Expr.SetArray(expr, indexExpr, rightBracket, expression());
+                } else {
+                    expr = new Expr.GetArray(expr, indexExpr, rightBracket);
+                }
             } else {
                 break;
             }
@@ -339,6 +348,23 @@ public class Parser {
 
         if (match(TokenType.IDENTIFIER)) {
             return new Expr.Variable(previous());
+        }
+
+        // array literal
+        if (match(TokenType.LEFT_BRACKET)) {
+            List<Expr> elements = new ArrayList<>();
+            Expr sizeExpr = null;
+            if (!check(TokenType.RIGHT_BRACKET)) {
+                do {
+                    elements.add(expression());
+                } while (match(TokenType.COMMA));
+            }
+            Token rightBracket = consume(TokenType.RIGHT_BRACKET, "Expect ']' after element list.");
+            if (match(TokenType.LEFT_PAREN)) {
+                sizeExpr = expression();
+                consume(TokenType.RIGHT_PAREN, "Expect ')' after size spec.");
+            }
+            return new Expr.ArrayLiteral(elements, rightBracket, sizeExpr);
         }
 
         if (match(TokenType.LEFT_PAREN)) {

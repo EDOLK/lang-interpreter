@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.edolk.Expr.ArrayLiteral;
 import com.edolk.Expr.FunctionLiteral;
+import com.edolk.Expr.GetArray;
+import com.edolk.Expr.SetArray;
 import com.edolk.nativefuncs.Clock;
 import com.edolk.nativefuncs.Print;
 
@@ -214,6 +217,63 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return function;
     }
 
+    @Override
+    public Object visitArrayLiteralExpr(ArrayLiteral expr) {
+        int size = 0;
+        if (expr.sizeExpr != null) {
+            Object sizeValue = evaluate(expr.sizeExpr);
+            if (sizeValue instanceof Double d && isWholeNumber(d)) {
+                size = (int)Math.floor(d);
+            } else {
+                throw new RuntimeError(expr.rightBracket, "Array size must be whole number.");
+            }
+        } else {
+            size = expr.elements.size();
+        }
+        if (size < expr.elements.size()) {
+            throw new RuntimeError(expr.rightBracket, "Array elements exceed array size.");
+        }
+        Object[] array = new Object[size];
+        for (int i = 0; i < expr.elements.size(); i++) {
+            array[i] = evaluate(expr.elements.get(i));
+        }
+        return array;
+    }
+
+    @Override
+    public Object visitGetArrayExpr(GetArray expr) {
+        Object obj = evaluate(expr.array);
+        if (obj instanceof Object[] array) {
+            Object indexObj = evaluate(expr.index);
+            if (indexObj instanceof Double index && isWholeNumber(index)) {
+                if (index < array.length) {
+                    return array[(int)Math.floor(index)];
+                }
+                throw new RuntimeError(expr.rightBracket, "Array index out of bounds.");
+            }
+            throw new RuntimeError(expr.rightBracket, "Array index must be whole number.");
+        }
+        throw new RuntimeError(expr.rightBracket, "Only arrays can be indexed.");
+    }
+
+    @Override
+    public Object visitSetArrayExpr(SetArray expr) {
+        Object obj = evaluate(expr.array);
+        if (obj instanceof Object[] array) {
+            Object indexObj = evaluate(expr.index);
+            if (indexObj instanceof Double index && isWholeNumber(index)) {
+                if (index < array.length) {
+                    Object value = evaluate(expr.value);
+                    array[(int)Math.floor(index)] = value;
+                    return value;
+                }
+                throw new RuntimeError(expr.rightBracket, "Array index out of bounds.");
+            }
+            throw new RuntimeError(expr.rightBracket, "Array index must be whole number.");
+        }
+        throw new RuntimeError(expr.rightBracket, "Only arrays can be indexed.");
+    }
+
     // Statements
 
     @Override
@@ -300,7 +360,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
     }
 
-
     private void checkNumberOperands(Token operator,
             Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
@@ -324,6 +383,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (a == null) return false;
 
         return a.equals(b);
+    }
+
+    private boolean isWholeNumber(Double d) {
+        return d % 1.0 == 0 && d >= 0;
     }
 
 }

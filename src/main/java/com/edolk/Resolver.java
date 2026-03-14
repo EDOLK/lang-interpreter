@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import com.edolk.Expr.ArrayLiteral;
 import com.edolk.Expr.Assign;
 import com.edolk.Expr.Binary;
 import com.edolk.Expr.Call;
+import com.edolk.Expr.GetArray;
 import com.edolk.Expr.Grouping;
 import com.edolk.Expr.Literal;
 import com.edolk.Expr.Logical;
+import com.edolk.Expr.SetArray;
 import com.edolk.Expr.Unary;
 import com.edolk.Expr.Variable;
 import com.edolk.Stmt.Block;
@@ -272,6 +275,33 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         resolveLocal(expr, expr.name);
         return null;
     }
+
+    @Override
+    public Void visitArrayLiteralExpr(ArrayLiteral expr) {
+        for (Expr element : expr.elements)
+            resolve(element);
+
+        if (expr.sizeExpr != null)
+            resolve(expr.sizeExpr);
+
+        return null;
+    }
+
+    @Override
+    public Void visitGetArrayExpr(GetArray expr) {
+        resolve(expr.array);
+        resolve(expr.index);
+        return null;
+    }
+
+    @Override
+    public Void visitSetArrayExpr(SetArray expr) {
+        resolve(expr.array);
+        resolve(expr.index);
+        resolve(expr.value);
+        return null;
+    }
+
 
     private void resolveLocal(Expr expr, Token name) {
         for (int i = scopes.size() - 1; i >= 0; i--) {
