@@ -169,18 +169,15 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
 
-    // TODO: keep an eye on this as well
-
     @Override
     public Void visitFunctionLiteralExpr(Expr.FunctionLiteral function) {
         FunctionType enclosingFunction = null;
-        if (functionStmtStack.peek().literal != function) {
+        if ((!functionStmtStack.isEmpty() &&
+                functionStmtStack.peek().literal != function)
+                || currentFunction == FunctionType.NONE) {
             enclosingFunction = currentFunction;
             currentFunction = FunctionType.FUNCTION;
         }
-        // System.out.println("literal: " + function);
-        // System.out.println("current: " + currentFunction);
-        // System.out.println("enclosing: " + enclosingFunction);
         beginScope();
         for (Token param : function.params) {
             declare(param);

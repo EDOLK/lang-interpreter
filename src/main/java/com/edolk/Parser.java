@@ -341,8 +341,6 @@ public class Parser {
             return new Expr.Variable(previous());
         }
 
-        // TODO: CHECK FOR ANONYMOUS FUNCTION HERE AND DIFFERENTIATE FROM GROUPING
-
         if (match(TokenType.LEFT_PAREN)) {
             int offset = 1;
             List<Token> parenTokens = new ArrayList<>();
