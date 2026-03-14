@@ -343,40 +343,24 @@ public class Parser {
 
         if (match(TokenType.LEFT_PAREN)) {
             int offset = 1;
-            List<Token> parenTokens = new ArrayList<>();
-            while(!match(TokenType.RIGHT_PAREN)) {
-                parenTokens.add(advance());
+
+            while(!match(TokenType.RIGHT_PAREN)){
                 offset++;
+                advance();
             }
 
-            if (check(TokenType.LEFT_BRACE)) {
-                // THIS IS AN ANONYMOUS FUNCTION
-                List<Token> parameters = new ArrayList<>();
-                boolean b = false;
-                for (Token token : parenTokens) {
-                    if (b) {
-                        if (token.type != TokenType.COMMA) {
-                            throw error(token, "Expect comma.");
-                        }
-                    } else {
-                        if (token.type != TokenType.IDENTIFIER) {
-                            throw error(token, "Expect parameter name.");
-                        } else {
-                            parameters.add(token);
-                        }
-                    }
-                    b = !b;
-                }
-                consume(TokenType.LEFT_BRACE, "Expect '{' before function body.");
-                List<Stmt> body = block();
-                return new Expr.FunctionLiteral(parameters, body);
-            } else {
-                // THIS IS A GROUPING
-                current -= offset;
-                Expr expr = expression();
-                consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
-                return new Expr.Grouping(expr);
+            boolean isFunction = check(TokenType.LEFT_BRACE);
+
+            current -= offset;
+
+            if (isFunction){
+                current--;
+                return functionLiteral("function");
             }
+
+            Expr expr = expression();
+            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+            return new Expr.Grouping(expr);
         }
 
         throw error(peek(), "Expect expression");
