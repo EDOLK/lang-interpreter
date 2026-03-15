@@ -1,7 +1,6 @@
 package com.edolk;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,10 +166,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                     "Can only call functions and classes.");
         }
         Callable function = (Callable)callee;
-        if (arguments.size() != function.arity()) {
+        if (function.varargs()) {
+            if (arguments.size() < function.arity()-2) {
+                throw new RuntimeError(expr.paren, "Expected " +
+                        function.arity() + " arguments but got " +
+                        arguments.size() + ".");
+            }
+        } else if(arguments.size() != function.arity()){
             throw new RuntimeError(expr.paren, "Expected " +
-                function.arity() + " arguments but got " +
-                arguments.size() + ".");
+                    function.arity() + " arguments but got " +
+                    arguments.size() + ".");
         }
         return function.call(this, arguments);
     }

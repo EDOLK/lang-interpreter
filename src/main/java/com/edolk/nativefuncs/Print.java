@@ -52,4 +52,9 @@ public class Print implements Callable {
 
         return object.toString();
     }
+
+    @Override
+    public boolean varargs() {
+        return false;
+    }
 }

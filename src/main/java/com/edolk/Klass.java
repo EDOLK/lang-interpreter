@@ -41,5 +41,12 @@ public class Klass implements Callable {
         }
         return instance;
     }
+
+    @Override
+    public boolean varargs() {
+        Function initializer = findMethod("init");
+        if (initializer == null) return false;
+        return initializer.varargs();
+    }
     
 }
