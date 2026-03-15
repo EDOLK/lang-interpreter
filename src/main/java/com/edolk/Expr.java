@@ -19,6 +19,7 @@ abstract class Expr {
     R visitArrayLiteralExpr(ArrayLiteral expr);
     R visitGetArrayExpr(GetArray expr);
     R visitSetArrayExpr(SetArray expr);
+    R visitSliceArrayExpr(SliceArray expr);
   }
   static class Assign extends Expr {
     Assign(Token name, Expr value) {
@@ -237,6 +238,26 @@ abstract class Expr {
     final Expr index;
     final Token rightBracket;
     final Expr value;
+  }
+  static class SliceArray extends Expr {
+    SliceArray(Expr array, Expr leftIndex, Expr rightIndex, Expr step, Token rightBracket) {
+      this.array = array;
+      this.leftIndex = leftIndex;
+      this.rightIndex = rightIndex;
+      this.step = step;
+      this.rightBracket = rightBracket;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSliceArrayExpr(this);
+    }
+
+    final Expr array;
+    final Expr leftIndex;
+    final Expr rightIndex;
+    final Expr step;
+    final Token rightBracket;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

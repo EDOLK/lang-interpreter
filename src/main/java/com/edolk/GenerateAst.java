@@ -27,7 +27,8 @@ public class GenerateAst {
             "FunctionLiteral : List<Token> params, List<Stmt> body",
             "ArrayLiteral    : List<Expr> elements, Token rightBracket, Expr sizeExpr",
             "GetArray        : Expr array, Expr index, Token rightBracket",
-            "SetArray        : Expr array, Expr index, Token rightBracket, Expr value"
+            "SetArray        : Expr array, Expr index, Token rightBracket, Expr value",
+            "SliceArray      : Expr array, Expr leftIndex, Expr rightIndex, Expr step, Token rightBracket"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(

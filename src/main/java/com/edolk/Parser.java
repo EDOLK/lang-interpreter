@@ -261,6 +261,7 @@ public class Parser {
 
         return expr;
     }
+
     private Expr term() {
         Expr expr = factor();
         while (match(TokenType.MINUS, TokenType.PLUS)) { 
@@ -302,13 +303,28 @@ public class Parser {
                         "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
             } else if (match(TokenType.LEFT_BRACKET)){
-                Expr indexExpr = expression();
+                Expr exp1 = null;
+                Expr exp2 = null;
+                Expr exp3 = null;
+                boolean colon = false;
+                exp1 = expression();
+                if (colon = match(TokenType.COLON)) {
+                    exp2 = expression();
+                    if (match(TokenType.COLON)) {
+                        exp3 = expression();
+                    }
+                }
                 Token rightBracket = consume(TokenType.RIGHT_BRACKET, 
-                        "Expect ']' after index.");
+                        "Expect ']' after index or slice.");
                 if (match(TokenType.EQUAL)) {
-                    expr = new Expr.SetArray(expr, indexExpr, rightBracket, expression());
-                } else {
-                    expr = new Expr.GetArray(expr, indexExpr, rightBracket);
+                    if (exp1 == null) {
+                        throw error(rightBracket, "Expect expression");
+                    }
+                    expr = new Expr.SetArray(expr, exp1, rightBracket, expression());
+                } else if(colon){
+                    expr = new Expr.SliceArray(expr, exp1, exp2, exp3, rightBracket);
+                } else if(exp1 != null) {
+                    expr = new Expr.GetArray(expr, exp1, rightBracket);
                 }
             } else {
                 break;
