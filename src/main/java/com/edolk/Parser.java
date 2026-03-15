@@ -214,6 +214,8 @@ public class Parser {
             } else if (expr instanceof Expr.Get) {
                 Expr.Get get = (Expr.Get)expr;
                 return new Expr.Set(get.object, get.name, value);
+            } else if (expr instanceof Expr.GetArray gArray){
+                return new Expr.SetArray(gArray.array, gArray.index, gArray.rightBracket, value);
             }
 
             error(equals, "Invalid assignment target."); 
@@ -316,18 +318,12 @@ public class Parser {
                 exp1 = expression();
                 if (colon = match(TokenType.COLON)) {
                     exp2 = expression();
-                    if (match(TokenType.COLON)) {
+                    if (match(TokenType.COLON))
                         exp3 = expression();
-                    }
                 }
                 Token rightBracket = consume(TokenType.RIGHT_BRACKET, 
                         "Expect ']' after index or slice.");
-                if (match(TokenType.EQUAL)) {
-                    if (exp1 == null) {
-                        throw error(rightBracket, "Expect expression");
-                    }
-                    expr = new Expr.SetArray(expr, exp1, rightBracket, expression());
-                } else if(colon){
+                if (colon){
                     expr = new Expr.SliceArray(expr, exp1, exp2, exp3, rightBracket);
                 } else if(exp1 != null) {
                     expr = new Expr.GetArray(expr, exp1, rightBracket);

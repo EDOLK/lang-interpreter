@@ -268,6 +268,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             int index = toArrayIndex(array.length, evaluate(expr.index), expr.rightBracket);
             Object value = evaluate(expr.value);
             array[index] = value;
+            return value;
         }
         throw new RuntimeError(expr.rightBracket, "Only arrays can be indexed.");
     }
