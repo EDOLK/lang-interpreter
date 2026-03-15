@@ -178,6 +178,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object object = evaluate(expr.object);
         if (object instanceof Instance) {
             return ((Instance) object).get(expr.name);
+        } else if (object instanceof Object[] array){
+            if (expr.name.lexeme.equals("length")) {
+                return (double)array.length;
+            }
         }
 
         throw new RuntimeError(expr.name,
