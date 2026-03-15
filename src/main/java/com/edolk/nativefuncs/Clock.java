@@ -19,4 +19,9 @@ public class Clock implements Callable {
 
     @Override
     public String toString() { return "<native fn>"; }
+
+    @Override
+    public boolean varargs() {
+        return false;
+    }
 }
