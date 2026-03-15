@@ -1,11 +1,16 @@
 package com.edolk;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.edolk.Expr.ArrayLiteral;
 import com.edolk.Expr.FunctionLiteral;
+import com.edolk.Expr.GetArray;
+import com.edolk.Expr.SetArray;
+import com.edolk.Expr.SliceArray;
 import com.edolk.nativefuncs.Clock;
 import com.edolk.nativefuncs.Print;
 
@@ -175,6 +180,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object object = evaluate(expr.object);
         if (object instanceof Instance) {
             return ((Instance) object).get(expr.name);
+        } else if (object instanceof Object[] array){
+            if (expr.name.lexeme.equals("length")) {
+                return (double)array.length;
+            }
         }
 
         throw new RuntimeError(expr.name,
@@ -212,6 +221,97 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Function function = new Function(expr, environment, false);
         // environment.define(expr.toString(), function);
         return function;
+    }
+
+    @Override
+    public Object visitArrayLiteralExpr(ArrayLiteral expr) {
+        int size = 0;
+        if (expr.sizeExpr != null) {
+            Object sizeValue = evaluate(expr.sizeExpr);
+            if (sizeValue instanceof Double d && isWholeNumber(d)) {
+                size = (int)Math.floor(d);
+            } else {
+                throw new RuntimeError(expr.rightBracket, "Array size must be whole number.");
+            }
+        } else {
+            size = expr.elements.size();
+        }
+        if (size < expr.elements.size()) {
+            throw new RuntimeError(expr.rightBracket, "Array elements exceed array size.");
+        }
+        Object[] array = new Object[size];
+        for (int i = 0; i < expr.elements.size(); i++) {
+            array[i] = evaluate(expr.elements.get(i));
+        }
+        return array;
+    }
+
+    @Override
+    public Object visitGetArrayExpr(GetArray expr) {
+        Object obj = evaluate(expr.array);
+        if (obj instanceof Object[] array) {
+            int index = toArrayIndex(array.length, evaluate(expr.index), expr.rightBracket);
+            return array[index];
+        }
+        throw new RuntimeError(expr.rightBracket, "Only arrays can be indexed.");
+    }
+
+    @Override
+    public Object visitSetArrayExpr(SetArray expr) {
+        Object obj = evaluate(expr.array);
+        if (obj instanceof Object[] array) {
+            int index = toArrayIndex(array.length, evaluate(expr.index), expr.rightBracket);
+            Object value = evaluate(expr.value);
+            array[index] = value;
+        }
+        throw new RuntimeError(expr.rightBracket, "Only arrays can be indexed.");
+    }
+
+    @Override
+    public Object visitSliceArrayExpr(SliceArray expr) {
+        Object obj = evaluate(expr.array);
+        if (obj instanceof Object[] array) {
+            int leftIndex = 0;
+            int rightIndex = array.length;
+            int step = 1;
+            if (expr.leftIndex != null) {
+                leftIndex = toArrayIndex(array.length, evaluate(expr.leftIndex), expr.rightBracket);
+            }
+            if (expr.rightIndex != null) {
+                if (!(evaluate(expr.rightIndex) instanceof Double d) || !isWholeNumber(d)) {
+                    throw new RuntimeError(expr.rightBracket, "Index must be whole number.");
+                }
+                if (d > array.length) {
+                    throw new RuntimeError(expr.rightBracket, "Index out of bounds.");
+                }
+                rightIndex = (int)Math.floor(d);
+            }
+            if (expr.step != null) {
+                if (evaluate(expr.step) instanceof Double d && isWholeNumber(d)) {
+                    step = (int)Math.floor(d);
+                }
+            }
+            List<Object> preArray = new ArrayList<>();
+            for (int i = leftIndex; i < rightIndex; i += step) {
+                preArray.add(array[i]);
+            }
+            return preArray.toArray(new Object[preArray.size()]);
+        }
+        throw new RuntimeError(expr.rightBracket, "Only arrays can be sliced.");
+    }
+
+    public int toArrayIndex(int arrayLength, Object index, Token rightBracket){
+        if (index instanceof Double d && isWholeNumber(d)) {
+            if (d < arrayLength) {
+                return (int)Math.floor(d);
+            }
+            throw new RuntimeError(rightBracket, "Index out of bounds.");
+        }
+        throw new RuntimeError(rightBracket, "Index must be whole number.");
+    }
+
+    public Object getFromArray(Object[] array, int index){
+        return array[index];
     }
 
     // Statements
@@ -300,7 +400,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
     }
 
-
     private void checkNumberOperands(Token operator,
             Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
@@ -324,6 +423,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (a == null) return false;
 
         return a.equals(b);
+    }
+
+    public boolean isWholeNumber(Object obj){
+        if (obj instanceof Double d) {
+            return isWholeNumber(d);
+        }
+        return false;
+    }
+
+    private boolean isWholeNumber(Double d) {
+        return d % 1.0 == 0 && d >= 0;
     }
 
 }

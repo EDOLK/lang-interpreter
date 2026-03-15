@@ -261,6 +261,7 @@ public class Parser {
 
         return expr;
     }
+
     private Expr term() {
         Expr expr = factor();
         while (match(TokenType.MINUS, TokenType.PLUS)) { 
@@ -301,6 +302,30 @@ public class Parser {
                 Token name = consume(TokenType.IDENTIFIER,
                         "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
+            } else if (match(TokenType.LEFT_BRACKET)){
+                Expr exp1 = null;
+                Expr exp2 = null;
+                Expr exp3 = null;
+                boolean colon = false;
+                exp1 = expression();
+                if (colon = match(TokenType.COLON)) {
+                    exp2 = expression();
+                    if (match(TokenType.COLON)) {
+                        exp3 = expression();
+                    }
+                }
+                Token rightBracket = consume(TokenType.RIGHT_BRACKET, 
+                        "Expect ']' after index or slice.");
+                if (match(TokenType.EQUAL)) {
+                    if (exp1 == null) {
+                        throw error(rightBracket, "Expect expression");
+                    }
+                    expr = new Expr.SetArray(expr, exp1, rightBracket, expression());
+                } else if(colon){
+                    expr = new Expr.SliceArray(expr, exp1, exp2, exp3, rightBracket);
+                } else if(exp1 != null) {
+                    expr = new Expr.GetArray(expr, exp1, rightBracket);
+                }
             } else {
                 break;
             }
@@ -339,6 +364,23 @@ public class Parser {
 
         if (match(TokenType.IDENTIFIER)) {
             return new Expr.Variable(previous());
+        }
+
+        // array literal
+        if (match(TokenType.LEFT_BRACKET)) {
+            List<Expr> elements = new ArrayList<>();
+            Expr sizeExpr = null;
+            if (!check(TokenType.RIGHT_BRACKET)) {
+                do {
+                    elements.add(expression());
+                } while (match(TokenType.COMMA));
+            }
+            Token rightBracket = consume(TokenType.RIGHT_BRACKET, "Expect ']' after element list.");
+            if (match(TokenType.LEFT_PAREN)) {
+                sizeExpr = expression();
+                consume(TokenType.RIGHT_PAREN, "Expect ')' after size spec.");
+            }
+            return new Expr.ArrayLiteral(elements, rightBracket, sizeExpr);
         }
 
         if (match(TokenType.LEFT_PAREN)) {

@@ -16,6 +16,10 @@ abstract class Expr {
     R visitUnaryExpr(Unary expr);
     R visitVariableExpr(Variable expr);
     R visitFunctionLiteralExpr(FunctionLiteral expr);
+    R visitArrayLiteralExpr(ArrayLiteral expr);
+    R visitGetArrayExpr(GetArray expr);
+    R visitSetArrayExpr(SetArray expr);
+    R visitSliceArrayExpr(SliceArray expr);
   }
   static class Assign extends Expr {
     Assign(Token name, Expr value) {
@@ -184,6 +188,76 @@ abstract class Expr {
 
     final List<Token> params;
     final List<Stmt> body;
+  }
+  static class ArrayLiteral extends Expr {
+    ArrayLiteral(List<Expr> elements, Token rightBracket, Expr sizeExpr) {
+      this.elements = elements;
+      this.rightBracket = rightBracket;
+      this.sizeExpr = sizeExpr;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitArrayLiteralExpr(this);
+    }
+
+    final List<Expr> elements;
+    final Token rightBracket;
+    final Expr sizeExpr;
+  }
+  static class GetArray extends Expr {
+    GetArray(Expr array, Expr index, Token rightBracket) {
+      this.array = array;
+      this.index = index;
+      this.rightBracket = rightBracket;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitGetArrayExpr(this);
+    }
+
+    final Expr array;
+    final Expr index;
+    final Token rightBracket;
+  }
+  static class SetArray extends Expr {
+    SetArray(Expr array, Expr index, Token rightBracket, Expr value) {
+      this.array = array;
+      this.index = index;
+      this.rightBracket = rightBracket;
+      this.value = value;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSetArrayExpr(this);
+    }
+
+    final Expr array;
+    final Expr index;
+    final Token rightBracket;
+    final Expr value;
+  }
+  static class SliceArray extends Expr {
+    SliceArray(Expr array, Expr leftIndex, Expr rightIndex, Expr step, Token rightBracket) {
+      this.array = array;
+      this.leftIndex = leftIndex;
+      this.rightIndex = rightIndex;
+      this.step = step;
+      this.rightBracket = rightBracket;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSliceArrayExpr(this);
+    }
+
+    final Expr array;
+    final Expr leftIndex;
+    final Expr rightIndex;
+    final Expr step;
+    final Token rightBracket;
   }
 
   abstract <R> R accept(Visitor<R> visitor);
