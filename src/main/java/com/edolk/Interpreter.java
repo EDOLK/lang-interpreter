@@ -10,6 +10,7 @@ import com.edolk.Expr.FunctionLiteral;
 import com.edolk.Expr.GetArray;
 import com.edolk.Expr.SetArray;
 import com.edolk.Expr.SliceArray;
+import com.edolk.Stmt.Source;
 import com.edolk.nativefuncs.Clock;
 import com.edolk.nativefuncs.Print;
 
@@ -375,6 +376,19 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
         executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitSourceStmt(Source stmt) {
+        Object value = evaluate(stmt.value);
+        if (value instanceof String path) {
+            try {
+                Engine.runFile(path);
+            } catch (Exception e) {
+                throw new RuntimeError(stmt.keyword, "Could not open file " + path + ".");
+            }
+        }
         return null;
     }
 
