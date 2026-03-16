@@ -22,6 +22,7 @@ import com.edolk.Stmt.Expression;
 import com.edolk.Stmt.Function;
 import com.edolk.Stmt.If;
 import com.edolk.Stmt.Return;
+import com.edolk.Stmt.Source;
 import com.edolk.Stmt.Var;
 import com.edolk.Stmt.While;
 
@@ -314,6 +315,13 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolve(expr.step);
         return null;
     }
+
+    @Override
+    public Void visitSourceStmt(Source stmt) {
+        resolve(stmt.value);
+        return null;
+    }
+
 
     private void resolveLocal(Expr expr, Token name) {
         for (int i = scopes.size() - 1; i >= 0; i--) {

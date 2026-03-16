@@ -75,6 +75,7 @@ public class Parser {
         if (match(TokenType.FOR)) return forStatement();
         if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.RETURN)) return returnStatement();
+        if (match(TokenType.SOURCE)) return sourceStatement();
         if (match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
 
@@ -150,6 +151,17 @@ public class Parser {
         return new Stmt.Return(keyword, value);
     }
 
+    private Stmt sourceStatement() {
+        Token keyword = previous();
+        Expr value = null;
+        if (!check(TokenType.SEMICOLON)){
+            value = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after source path.");
+        return new Stmt.Source(keyword, value);
+    }
+
     private Stmt expressionStatement() {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Expect ';' after expression.");
@@ -217,16 +229,16 @@ public class Parser {
             Token prefix = null;
             switch (equals.type) {
                 case MINUS_EQUAL:
-                    prefix = new Token(TokenType.MINUS, "-", null, equals.line);
+                    prefix = new Token(TokenType.MINUS, "-", equals.file, null, equals.line);
                     break;
                 case PLUS_EQUAL:
-                    prefix = new Token(TokenType.PLUS, "+", null, equals.line);
+                    prefix = new Token(TokenType.PLUS, "+", equals.file, null, equals.line);
                     break;
                 case STAR_EQUAL:
-                    prefix = new Token(TokenType.STAR, "*", null, equals.line);
+                    prefix = new Token(TokenType.STAR, "*", equals.file, null, equals.line);
                     break;
                 case SLASH_EQUAL:
-                    prefix = new Token(TokenType.SLASH, "/", null, equals.line);
+                    prefix = new Token(TokenType.SLASH, "/", equals.file, null, equals.line);
                     break;
                 default:
             }

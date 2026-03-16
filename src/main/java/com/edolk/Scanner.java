@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Scanner{
     private final String source;
+    private final String path;
     private final List<Token> tokens = new ArrayList<>();
     private static final Map<String, TokenType> keywords;
 
@@ -27,12 +28,14 @@ public class Scanner{
         keywords.put("true",   TokenType.TRUE);
         keywords.put("var",    TokenType.VAR);
         keywords.put("while",  TokenType.WHILE);
+        keywords.put("source",  TokenType.SOURCE);
     }
     private int start;
     private int current;
     private int line = 1;
-    public Scanner(String source) {
+    public Scanner(String source, String path) {
         this.source = source;
+        this.path = path;
     }
 
     public List<Token> scanTokens() {
@@ -40,7 +43,7 @@ public class Scanner{
             start = current;
             scanToken();
         }
-        tokens.add(new Token(TokenType.EOF, "", null, line));
+        tokens.add(new Token(TokenType.EOF, "", path, null, line));
         return tokens;
     }
 
@@ -118,7 +121,7 @@ public class Scanner{
                 } else if (isAlpha(c)) {
                     identifier();
                 } else {
-                    Engine.error(line, "Unexpected character.");
+                    Engine.error(line, "Unexpected character.", path);
                 }
                 break;
         }
@@ -174,7 +177,7 @@ public class Scanner{
         }
 
         if (isAtEnd()) {
-            Engine.error(line, "Unterminated string.");
+            Engine.error(line, "Unterminated string.", path);
             return;
         }
 
@@ -206,6 +209,6 @@ public class Scanner{
 
     private void addToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
-        tokens.add(new Token(type, text, literal, line));
+        tokens.add(new Token(type, text, path, literal, line));
     }
 }

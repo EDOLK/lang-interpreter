@@ -25,9 +25,9 @@ public class Engine {
         }
     }
 
-    private static void runFile(String path) throws IOException {
+    public static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()));
+        run(new String(bytes, Charset.defaultCharset()), path);
         if (hadError) System.exit(65);
         if (hadRuntimeError) System.exit(70);
     }
@@ -40,13 +40,13 @@ public class Engine {
             System.out.print("> ");
             String line = reader.readLine();
             if (line == null) break;
-            run(line);
+            run(line, "PROMPT");
             hadError = false;
         }
     }
 
-    private static void run(String source) {
-        Scanner scanner = new Scanner(source);
+    private static void run(String source, String path) {
+        Scanner scanner = new Scanner(source, path);
         List<Token> tokens = scanner.scanTokens();
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
@@ -63,26 +63,26 @@ public class Engine {
 
     static void error(Token token, String message) {
         if (token.type == TokenType.EOF) {
-            report(token.line, " at end", message);
+            report(token.line, " at end", message, token.file);
         } else {
-            report(token.line, " at '" + token.lexeme + "'", message);
+            report(token.line, " at '" + token.lexeme + "'", message, token.file);
         }
     }
 
-    static void error(int line, String message) {
-        report(line, "", message);
+    static void error(int line, String message, String path) {
+        report(line, "", message, path);
     }
 
     static void runtimeError(RuntimeError error) {
         System.err.println(error.getMessage() +
-                "\n[line " + error.token.line + "]");
+                "\n[" + error.token.file + " line " + error.token.line + "]");
         hadRuntimeError = true;
     }
 
     private static void report(int line, String where,
-            String message) {
+            String message, String path) {
         System.err.println(
-                "[line " + line + "] Error" + where + ": " + message);
+                "[" + path + " line " + line + "] Error" + where + ": " + message);
         hadError = true;
     }
 }
