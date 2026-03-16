@@ -204,18 +204,53 @@ public class Parser {
     private Expr assignment() {
         Expr expr = or();
 
-        if (match(TokenType.EQUAL)) {
+        if (match(
+            TokenType.EQUAL,
+            TokenType.MINUS_EQUAL,
+            TokenType.PLUS_EQUAL,
+            TokenType.STAR_EQUAL,
+            TokenType.SLASH_EQUAL
+        )) {
             Token equals = previous();
             Expr value = assignment();
 
-            if (expr instanceof Expr.Variable) {
-                Token name = ((Expr.Variable)expr).name;
-                return new Expr.Assign(name, value);
-            } else if (expr instanceof Expr.Get) {
-                Expr.Get get = (Expr.Get)expr;
-                return new Expr.Set(get.object, get.name, value);
-            } else if (expr instanceof Expr.GetArray gArray){
-                return new Expr.SetArray(gArray.array, gArray.index, gArray.rightBracket, value);
+            Token prefix = null;
+            switch (equals.type) {
+                case MINUS_EQUAL:
+                    prefix = new Token(TokenType.MINUS, "-", null, equals.line);
+                    break;
+                case PLUS_EQUAL:
+                    prefix = new Token(TokenType.PLUS, "+", null, equals.line);
+                    break;
+                case STAR_EQUAL:
+                    prefix = new Token(TokenType.STAR, "*", null, equals.line);
+                    break;
+                case SLASH_EQUAL:
+                    prefix = new Token(TokenType.SLASH, "/", null, equals.line);
+                    break;
+                default:
+            }
+
+            boolean isCompound = prefix != null;
+
+            if (expr instanceof Expr.Variable var) {
+                return new Expr.Assign(
+                    var.name, 
+                    (isCompound ? new Expr.Binary(expr, prefix, value) : value)
+                );
+            } else if (expr instanceof Expr.Get get) {
+                return new Expr.Set(
+                    get.object, 
+                    get.name, 
+                    (isCompound ? new Expr.Binary(expr, prefix, value) : value)
+                );
+            } else if (expr instanceof Expr.GetArray getArray){
+                return new Expr.SetArray(
+                    getArray.array, 
+                    getArray.index, 
+                    getArray.rightBracket, 
+                    (isCompound ? new Expr.Binary(expr, prefix, value) : value)
+                );
             }
 
             error(equals, "Invalid assignment target."); 
