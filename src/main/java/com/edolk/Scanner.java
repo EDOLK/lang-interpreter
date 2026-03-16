@@ -70,10 +70,16 @@ public class Scanner{
                 }
                 addToken(TokenType.DOT);
                 break;
-            case '-': addToken(TokenType.MINUS); break;
-            case '+': addToken(TokenType.PLUS); break;
+            case '-':
+                addToken(match('=') ? TokenType.MINUS_EQUAL : TokenType.MINUS);
+                break;
+            case '+':
+                addToken(match('=') ? TokenType.PLUS_EQUAL : TokenType.PLUS);
+                break;
             case ';': addToken(TokenType.SEMICOLON); break;
-            case '*': addToken(TokenType.STAR); break; 
+            case '*':
+                addToken(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
+                break;
             case ':': addToken(TokenType.COLON); break;
             case '!': 
                 addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
@@ -91,6 +97,8 @@ public class Scanner{
                 if (match('/')) {
                     // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance();
+                } else if (match('=')){
+                    addToken(TokenType.SLASH_EQUAL);
                 } else {
                     addToken(TokenType.SLASH);
                 }
