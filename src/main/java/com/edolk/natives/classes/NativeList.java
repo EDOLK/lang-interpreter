@@ -6,22 +6,31 @@ import java.util.List;
 import java.util.Map;
 
 import com.edolk.Callable;
-import com.edolk.nativefuncs.Print;
 
 public class NativeList extends NativeInstance {
 
-    private List<Object> list = new ArrayList<>();
+    private final List<Object> list;
 
-    public NativeList(boolean instance) {
+    public NativeList(boolean instance, List<Object> list) {
         super(instance);
+        this.list = list;
+    }
+
+    public NativeList(boolean instance){
+        this(instance, new ArrayList<>());
+    }
+
+    public NativeList(List<Object> list){
+        this(true, list);
     }
 
     @Override
     protected Map<String, Object> getProperties() {
         Map<String, Object> map = new HashMap<>();
-
         map.put("addAt", Callable.create(2, false, (interpreter, args) -> {
-            list.add((int)args.get(0), args.get(1));
+            if (args.get(0) instanceof Double d) {
+                list.add((int)Math.floor(d), args.get(1));
+            }
             return null;
         }));
         map.put("add", Callable.create(1, false, (interpreter, args) -> {
@@ -56,7 +65,21 @@ public class NativeList extends NativeInstance {
         map.put("getLast", Callable.create(0, false, (interpreter, args) -> {
             return list.getLast();
         }));
-
+        map.put("forEach", Callable.create(1, false, (interpreter, args) -> {
+            Object obj = args.get(0);
+            if (obj instanceof Callable cal) {
+                list.forEach((element) -> {
+                    cal.call(interpreter, List.of(element));
+                });
+            }
+            return null;
+        }));
+        map.put("isEmpty", Callable.create(0, false, (interpreter, args) -> {
+            return list.isEmpty();
+        }));
+        map.put("iterator", Callable.create(0, false, (interpreter, args) -> {
+            return new NativeIterator(list.iterator());
+        }));
         return map;
     }
 

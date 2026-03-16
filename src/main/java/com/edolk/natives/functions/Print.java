@@ -1,4 +1,4 @@
-package com.edolk.nativefuncs;
+package com.edolk.natives.functions;
 
 import java.util.List;
 

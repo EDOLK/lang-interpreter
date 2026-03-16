@@ -11,10 +11,11 @@ import com.edolk.Expr.GetArray;
 import com.edolk.Expr.SetArray;
 import com.edolk.Expr.SliceArray;
 import com.edolk.Stmt.Source;
-import com.edolk.nativefuncs.Clock;
-import com.edolk.nativefuncs.Print;
 import com.edolk.natives.classes.NativeList;
+import com.edolk.natives.classes.NativeMap;
 import com.edolk.natives.classes.NativeSet;
+import com.edolk.natives.functions.Clock;
+import com.edolk.natives.functions.Print;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -27,6 +28,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("print", new Print());
         globals.define("List", new NativeList(false));
         globals.define("Set", new NativeSet(false));
+        globals.define("Map", new NativeMap(false));
     }
 
     void interpret(List<Stmt> statements) {
