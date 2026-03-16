@@ -13,6 +13,8 @@ import com.edolk.Expr.SliceArray;
 import com.edolk.Stmt.Source;
 import com.edolk.nativefuncs.Clock;
 import com.edolk.nativefuncs.Print;
+import com.edolk.natives.classes.NativeList;
+import com.edolk.natives.classes.NativeSet;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -23,6 +25,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     Interpreter() {
         globals.define("clock", new Clock());
         globals.define("print", new Print());
+        globals.define("List", new NativeList(false));
+        globals.define("Set", new NativeSet(false));
     }
 
     void interpret(List<Stmt> statements) {

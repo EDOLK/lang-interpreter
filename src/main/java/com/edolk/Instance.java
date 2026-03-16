@@ -11,7 +11,7 @@ public class Instance {
         this.klass = klass;
     }
 
-    Object get(Token name) {
+    public Object get(Token name) {
         if (fields.containsKey(name.lexeme)) {
             return fields.get(name.lexeme);
         }
@@ -21,7 +21,7 @@ public class Instance {
                 "Undefined property '" + name.lexeme + "'.");
     }
 
-    void set(Token name, Object value) {
+    public void set(Token name, Object value) {
         fields.put(name.lexeme, value);
     }
 
