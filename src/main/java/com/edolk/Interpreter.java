@@ -170,7 +170,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (function.varargs()) {
             if (arguments.size() < function.arity()-2) {
                 throw new RuntimeError(expr.paren, "Expected " +
-                        function.arity() + " arguments but got " +
+                        (function.arity()-2) + " arguments but got " +
                         arguments.size() + ".");
             }
         } else if(arguments.size() != function.arity()){
