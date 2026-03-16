@@ -1,4 +1,4 @@
-package com.edolk.nativefuncs;
+package com.edolk.natives.functions;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class Print implements Callable {
     @Override
     public String toString() { return "<native fn>"; }
 
-    private String stringify(Object object) {
+    public static String stringify(Object object) {
         if (object == null) return "nil";
 
         if (object instanceof String str){

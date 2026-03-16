@@ -11,8 +11,14 @@ import com.edolk.Expr.GetArray;
 import com.edolk.Expr.SetArray;
 import com.edolk.Expr.SliceArray;
 import com.edolk.Stmt.Source;
-import com.edolk.nativefuncs.Clock;
-import com.edolk.nativefuncs.Print;
+import com.edolk.natives.classes.NativeDeque;
+import com.edolk.natives.classes.NativeList;
+import com.edolk.natives.classes.NativeMap;
+import com.edolk.natives.classes.NativeQueue;
+import com.edolk.natives.classes.NativeSet;
+import com.edolk.natives.classes.NativeStack;
+import com.edolk.natives.functions.Clock;
+import com.edolk.natives.functions.Print;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -23,6 +29,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     Interpreter() {
         globals.define("clock", new Clock());
         globals.define("print", new Print());
+        globals.define("List", new NativeList(false));
+        globals.define("Set", new NativeSet(false));
+        globals.define("Map", new NativeMap(false));
+        globals.define("Stack", new NativeStack(false));
+        globals.define("Queue", new NativeQueue(false));
+        globals.define("Deque", new NativeDeque(false));
     }
 
     void interpret(List<Stmt> statements) {
