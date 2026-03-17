@@ -1,15 +1,27 @@
 package com.edolk.natives.classes;
 
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.edolk.Callable;
 
-public class NativeDeque extends NativeInstance {
+public class NativeDeque extends NativeInstance implements NativeCollection{
 
     private final Deque<Object> deque;
+
+    @Override
+    public Collection<Object> getAsCollection() {
+        return deque;
+    }
+
+    @Override
+    public NativeCollection create(Object[] array) {
+        return new NativeDeque(new LinkedList<Object>(List.of(array)));
+    }
 
     public NativeDeque(boolean instance, Deque<Object> deque) {
         super(instance);

@@ -1,14 +1,29 @@
 package com.edolk.natives.classes;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 import com.edolk.Callable;
 
-public class NativeStack extends NativeInstance {
+public class NativeStack extends NativeInstance implements NativeCollection {
 
     private final Stack<Object> stack;
+
+    @Override
+    public Collection<Object> getAsCollection() {
+        return stack;
+    }
+
+    @Override
+    public NativeCollection create(Object[] array) {
+        Stack<Object> stack = new Stack<>();
+        for (int i = array.length-1; i >= 0 ; i--) {
+            stack.push(array[i]);
+        }
+        return new NativeStack(stack);
+    }
 
     public NativeStack(boolean instance, Stack<Object> stack) {
         super(instance);
@@ -36,6 +51,9 @@ public class NativeStack extends NativeInstance {
         }));
         map.put("empty", Callable.create(0, false, (interpreter, args) -> {
             return stack.empty();
+        }));
+        map.put("size", Callable.create(0, false, (interpreter, args) -> {
+            return stack.size();
         }));
         return map;
     }

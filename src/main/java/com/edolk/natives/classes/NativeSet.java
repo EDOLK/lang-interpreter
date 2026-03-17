@@ -1,15 +1,27 @@
 package com.edolk.natives.classes;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.edolk.Callable;
 
-public class NativeSet extends NativeInstance {
+public class NativeSet extends NativeInstance implements NativeCollection {
 
     private final Set<Object> set;
+
+    @Override
+    public Collection<Object> getAsCollection() {
+        return this.set;
+    }
+
+    @Override
+    public NativeCollection create(Object[] array) {
+        return new NativeSet(new HashSet<>(List.of(array)));
+    }
 
     public NativeSet(boolean instance, Set<Object> set) {
         super(instance);
@@ -36,6 +48,9 @@ public class NativeSet extends NativeInstance {
         }));
         map.put("contains", Callable.create(1, false, (interpreter, args) -> {
             return set.contains(args.get(0));
+        }));
+        map.put("size", Callable.create(0, false, (interpreter, args) -> {
+            return set.size();
         }));
         map.put("clear", Callable.create(0, false, (interpreter, args) -> {
             set.clear();
