@@ -435,11 +435,6 @@ public class Parser {
         }
     }
 
-    // doThing(5, someVar, _, 6, 7, _, "hello") -> 
-    // (a,b){
-    //      return doThing(5, someVar, a, 6, 7, b, "hello");
-    // };
-
     private Expr.FunctionLiteral preparedFunctionLiteral(Expr callee, Token paren, List<Expr> arguments, List<Token> placeholders,
             Set<Integer> placeholderPlaces) {
         List<Token> newParameters = new ArrayList<>();
