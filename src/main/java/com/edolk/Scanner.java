@@ -84,6 +84,8 @@ public class Scanner{
                 addToken(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
                 break;
             case ':': addToken(TokenType.COLON); break;
+            case '|': addToken(TokenType.PIPE); break;
+            case '_': addToken(TokenType.UNDERSCORE); break;
             case '!': 
                 addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
                 break;
