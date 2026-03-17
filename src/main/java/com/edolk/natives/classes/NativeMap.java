@@ -56,5 +56,4 @@ public class NativeMap extends NativeInstance {
         });
     }
 
-    
 }

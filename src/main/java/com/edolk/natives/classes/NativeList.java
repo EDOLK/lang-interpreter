@@ -1,15 +1,26 @@
 package com.edolk.natives.classes;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.edolk.Callable;
 
-public class NativeList extends NativeInstance {
+public class NativeList extends NativeInstance implements NativeCollection {
 
     private final List<Object> list;
+
+    @Override
+    public Collection<Object> getAsCollection() {
+        return list;
+    }
+
+    @Override
+    public NativeCollection create(Object[] array) {
+        return new NativeList(new ArrayList<>(List.of(array)));
+    }
 
     public NativeList(boolean instance, List<Object> list) {
         super(instance);
