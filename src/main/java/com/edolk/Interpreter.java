@@ -18,7 +18,11 @@ import com.edolk.natives.classes.NativeQueue;
 import com.edolk.natives.classes.NativeSet;
 import com.edolk.natives.classes.NativeStack;
 import com.edolk.natives.functions.Clock;
+import com.edolk.natives.functions.Mean;
+import com.edolk.natives.functions.Median;
+import com.edolk.natives.functions.Mode;
 import com.edolk.natives.functions.Print;
+import com.edolk.natives.functions.Range;
 import com.edolk.natives.functions.Sort;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
@@ -33,7 +37,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("sort", new Sort());
         globals.define("mean", new Mean());
         globals.define("median", new Median());
-        globals.define("median", new Median());
+        globals.define("mode", new Mode());
+        globals.define("range", new Range());
         globals.define("List", new NativeList(false));
         globals.define("Set", new NativeSet(false));
         globals.define("Map", new NativeMap(false));
