@@ -2,7 +2,11 @@ package com.edolk;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 public class Parser {
     private static class ParseError extends RuntimeException {}
@@ -344,7 +348,24 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return call();
+        return pipe();
+    }
+
+    private Expr pipe(){
+        Expr expr = call();
+        while (match(TokenType.PIPE)) {
+            Token pipe = previous();
+            Expr right = call();
+            if (right instanceof Expr.Call call) {
+                List<Expr> args = call.arguments;
+                List<Expr> newArgs = new ArrayList<Expr>(args);
+                newArgs.addFirst(expr);
+                expr = new Expr.Call(call.callee, pipe, newArgs);
+            } else {
+                expr = new Expr.Call(right, pipe, new ArrayList<Expr>(List.of(expr)));
+            }
+        }
+        return expr;
     }
 
     private Expr call() {
@@ -385,19 +406,69 @@ public class Parser {
 
     private Expr finishCall(Expr callee) {
         List<Expr> arguments = new ArrayList<>();
+        List<Token> placeholders = new ArrayList<>();
+        Set<Integer> placeholderPlaces = new HashSet<>();
+        int i = 0;
         if (!check(TokenType.RIGHT_PAREN)) {
             do {
                 if (arguments.size() >= 255) {
                     error(peek(), "Can't have more than 255 arguments.");
                 }
-                arguments.add(expression());
+                if (match(TokenType.UNDERSCORE)) {
+                    placeholders.add(previous());
+                    arguments.add(null);
+                    placeholderPlaces.add(i++);
+                } else {
+                    arguments.add(expression());
+                    i++;
+                }
             } while (match(TokenType.COMMA));
         }
 
         Token paren = consume(TokenType.RIGHT_PAREN,
                 "Expect ')' after arguments.");
 
-        return new Expr.Call(callee, paren, arguments);
+        if (!placeholders.isEmpty()) {
+            return preparedFunctionLiteral(callee, paren, arguments, placeholders, placeholderPlaces);
+        } else {
+            return new Expr.Call(callee, paren, arguments);
+        }
+    }
+
+    private Expr.FunctionLiteral preparedFunctionLiteral(Expr callee, Token paren, List<Expr> arguments, List<Token> placeholders,
+            Set<Integer> placeholderPlaces) {
+        List<Token> newParameters = new ArrayList<>();
+        String tempid = "a";
+        for (@SuppressWarnings("unused") Token token : placeholders) {
+            newParameters.add(new Token(TokenType.IDENTIFIER, tempid, "", null, 0));
+            if (tempid.charAt(tempid.length()-1) == 'z') {
+                tempid = tempid + "a";
+            } else {
+                String t = tempid.substring(0, tempid.length() - 1);
+                t += (char)(tempid.charAt(tempid.length() - 1) + 1);
+                tempid = t;
+            }
+        }
+        List<Expr> newArguments = new ArrayList<>();
+        int paramI = 0;
+        for (int i = 0; i < arguments.size(); i++) {
+            if (placeholderPlaces.contains(i)) {
+                newArguments.add(new Expr.Variable(newParameters.get(paramI++)));
+            } else {
+                newArguments.add(arguments.get(i));
+            }
+        }
+        List<Stmt> body = new ArrayList<>();
+        Stmt.Return returnStmt = new Stmt.Return(
+            new Token(TokenType.RETURN, "return", "", null, 0),
+            new Expr.Call(
+                callee, 
+                paren, 
+                newArguments
+            )
+        );
+        body.add(returnStmt);
+        return new Expr.FunctionLiteral(newParameters, body);
     }
 
     private Expr primary() {

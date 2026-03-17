@@ -247,7 +247,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitFunctionLiteralExpr(FunctionLiteral expr) {
         Function function = new Function(expr, environment, false);
-        // environment.define(expr.toString(), function);
         return function;
     }
 
