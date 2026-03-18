@@ -1,5 +1,7 @@
 
 
+# Fog
+
 Fog is a batteries included functional language for data analysis and manipulation. Based on a modified version of [Lox](https://craftinginterpreters.com/) from the book Crafting Interpreters by Robert Nystrom.
 
 The purpose of the language is to be able to quickly and efficiently do common statistical operations on various data structures, focusing on structures common to relational databases like data tables, while minimizing overhead. Fog scripts should be easy to write and execute, without complex dependency management or excessive amounts of boilerplate.
