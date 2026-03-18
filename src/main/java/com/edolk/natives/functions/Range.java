@@ -27,7 +27,7 @@ public class Range implements Callable {
         } else if(sorted instanceof NativeCollection collection){
             return arrayRange(collection.getAsCollection().toArray());
         }
-        return null;
+        return arg0;
     }
 
     public static double arrayRange(Object[] array){

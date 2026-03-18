@@ -24,7 +24,7 @@ public class Split implements Callable {
         if (arg0 instanceof String str && arg1 instanceof String reg) {
             return (Object[])str.split(reg);
         }
-        return null;
+        return new Object[0];
     }
 
     

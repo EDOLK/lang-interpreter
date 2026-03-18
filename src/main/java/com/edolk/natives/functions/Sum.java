@@ -29,7 +29,7 @@ public class Sum implements Callable {
         } else if (arg0 instanceof NativeCollection collection){
             return arraySum(collection.getAsCollection().toArray());
         }
-        return null;
+        return arg0;
     }
 
     public static double arraySum(Object[] array){
