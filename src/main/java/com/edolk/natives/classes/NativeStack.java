@@ -53,7 +53,7 @@ public class NativeStack extends NativeInstance implements NativeCollection {
             return stack.empty();
         }));
         map.put("size", Callable.create(0, false, (interpreter, args) -> {
-            return stack.size();
+            return (double)stack.size();
         }));
         return map;
     }

@@ -1,6 +1,7 @@
 package com.edolk.natives.classes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.edolk.Callable;
@@ -41,10 +42,19 @@ public class NativeMap extends NativeInstance {
             return map.containsValue(args.get(0));
         }));
         m.put("size", Callable.create(0, false, (interpreter, args) -> {
-            return map.size();
+            return (double)map.size();
         }));
         m.put("isEmpty", Callable.create(0, false, (interpreter, args) -> {
             return map.isEmpty();
+        }));
+        m.put("forEach", Callable.create(1, false, (interpreter, args) -> {
+            Object obj = args.get(0);
+            if (obj instanceof Callable cal) {
+                map.forEach((key, value) -> {
+                    cal.call(interpreter, List.of(key, value));
+                });
+            }
+            return null;
         }));
         return m;
     }

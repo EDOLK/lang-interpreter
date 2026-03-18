@@ -50,7 +50,7 @@ public class NativeSet extends NativeInstance implements NativeCollection {
             return set.contains(args.get(0));
         }));
         map.put("size", Callable.create(0, false, (interpreter, args) -> {
-            return set.size();
+            return (double)set.size();
         }));
         map.put("clear", Callable.create(0, false, (interpreter, args) -> {
             set.clear();

@@ -24,6 +24,8 @@ import com.edolk.natives.functions.Mode;
 import com.edolk.natives.functions.Print;
 import com.edolk.natives.functions.Range;
 import com.edolk.natives.functions.Sort;
+import com.edolk.natives.functions.Split;
+import com.edolk.natives.functions.ToString;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -39,6 +41,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("median", new Median());
         globals.define("mode", new Mode());
         globals.define("range", new Range());
+        globals.define("split", new Split());
+        globals.define("tostring", new ToString());
         globals.define("List", new NativeList(false));
         globals.define("Set", new NativeSet(false));
         globals.define("Map", new NativeMap(false));
@@ -154,10 +158,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left - (double)right;
             case PLUS:
-                checkNumberOperands(expr.operator, left, right);
+                // checkNumberOperands(expr.operator, left, right);
                 if (left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
                 } 
+                if (left instanceof String || right instanceof String) {
+                    return Print.stringify(left) + Print.stringify(right);
+                }
                 if (left instanceof String && right instanceof String) {
                     return (String)left + (String)right;
                 }

@@ -26,10 +26,6 @@ public class Print implements Callable {
     public static String stringify(Object object) {
         if (object == null) return "nil";
 
-        if (object instanceof String str){
-            return "\"" + str + "\"";
-        }
-
         if (object instanceof Double) {
             String text = object.toString();
             if (text.endsWith(".0")) {
@@ -41,7 +37,13 @@ public class Print implements Callable {
         if (object instanceof Object[] arr) {
             String text = "[";
             for (int i = 0; i < arr.length; i++) {
-                text += stringify(arr[i]);
+                Object obj = arr[i];
+                if (obj instanceof String str) {
+                    str = "\"" + str + "\"";
+                    text += str;
+                } else {
+                    text += stringify(obj);
+                }
                 if (i != arr.length-1) {
                     text += ", ";
                 }

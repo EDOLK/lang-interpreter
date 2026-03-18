@@ -58,9 +58,9 @@ public class NativeList extends NativeInstance implements NativeCollection {
             return null;
         }));
         map.put("size", Callable.create(0, false, (interpreter, args) -> {
-            return list.size();
+            return (double)list.size();
         }));
-        map.put("contains", Callable.create(0, false, (interpreter, args) -> {
+        map.put("contains", Callable.create(1, false, (interpreter, args) -> {
             return list.contains(args.get(0));
         }));
         map.put("get", Callable.create(1, false, (interpreter, args) -> {
