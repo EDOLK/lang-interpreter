@@ -17,6 +17,6 @@ The purpose of the language is to be able to quickly and efficiently do common s
  - [X] Common Data Structures (Lists, Sets, Tables, Etc) & Relevant methods
  - [X] Native functions for common statistical operations (mean, median, mode, etc)
  - [X] Pipe Operator & Placeholder parameters
- - [ ] Data table data structure, importing csv/excel
- - [ ] Operations for Data tables, Pipe operator
+ - [ ] Data table data structure, importing csv/excel, 
+ - [ ] Operations for Data tables
 
