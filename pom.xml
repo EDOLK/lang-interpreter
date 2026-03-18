@@ -4,10 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.edolk</groupId>
-  <artifactId>lang-interpreter</artifactId>
+  <artifactId>fog</artifactId>
   <version>1.0</version>
 
-  <name>lang-interpreter</name>
+  <name>Fog</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -64,6 +64,13 @@
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.4.2</version>
+            <configuration>
+              <archive>
+                <manifest>
+                  <mainClass>com.edolk.App</mainClass>
+                </manifest>
+              </archive>
+            </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
