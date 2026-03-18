@@ -1,8 +1,10 @@
 
 
+# Fog
+
 Fog is a batteries included functional language for data analysis and manipulation. Based on a modified version of [Lox](https://craftinginterpreters.com/) from the book Crafting Interpreters by Robert Nystrom.
 
-The purpose of the language is to be able to quickly and efficiently do common statistical operations on various data structures, focusing on structures common to relational databases like data tables, while minimizing overhead. Fog scripts should be easy to write and execute, without complex dependency management or excessive amounts of boilerplate.
+The purpose of the language is to be able to quickly and efficiently do common statistical operations on various data structures, focusing on structures common to relational databases like data tables (CSVs & Spreadsheets), while minimizing overhead. Fog scripts should be easy to write and execute, without complex dependency management or excessive amounts of boilerplate.
 
 ### TODO:
 
@@ -12,8 +14,9 @@ The purpose of the language is to be able to quickly and efficiently do common s
  - [X] Function Calls and Definitions
  - [X] Classes & Objects
  - [X] Anonymous Functions
- - [ ] Common Data Structures (Lists, Sets, Tables, Etc) & Relevant methods
- - [ ] Native functions for common statistical operations (mean, median, mode, etc)
- - [ ] Data table data structure, importing csv/powerpoint
+ - [X] Common Data Structures (Lists, Sets, Tables, Etc) & Relevant methods
+ - [X] Native functions for common statistical operations (mean, median, mode, etc)
+ - [X] Pipe Operator & Placeholder parameters
+ - [ ] Data table data structure, importing csv/excel
  - [ ] Operations for Data tables, Pipe operator
 
