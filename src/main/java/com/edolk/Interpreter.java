@@ -22,6 +22,7 @@ import com.edolk.natives.functions.Mean;
 import com.edolk.natives.functions.Median;
 import com.edolk.natives.functions.Mode;
 import com.edolk.natives.functions.Print;
+import com.edolk.natives.functions.Random;
 import com.edolk.natives.functions.Range;
 import com.edolk.natives.functions.Sort;
 import com.edolk.natives.functions.Split;
@@ -49,6 +50,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("Stack", new NativeStack(false));
         globals.define("Queue", new NativeQueue(false));
         globals.define("Deque", new NativeDeque(false));
+        globals.define("random", new Random());
     }
 
     void interpret(List<Stmt> statements) {
