@@ -160,13 +160,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left - (double)right;
             case PLUS:
-                // checkNumberOperands(expr.operator, left, right);
-                if (left instanceof Double ld && right instanceof Double rd) {
+                if (left instanceof Double ld && right instanceof Double rd)
                     return ld + rd;
-                } 
-                if (left instanceof String || right instanceof String) {
+                if (left instanceof String || right instanceof String)
                     return Print.stringify(left) + Print.stringify(right);
-                }
                 throw new RuntimeError(expr.operator,
                         "Operands must be two numbers or two strings.");
             case SLASH:
@@ -175,6 +172,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left * (double)right;
+            case PERCENT:
+                checkNumberOperands(expr.operator, left, right);
+                return (double)left % (double)right;
             default:
         }
 
