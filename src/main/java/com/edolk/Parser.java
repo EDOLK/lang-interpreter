@@ -223,7 +223,8 @@ public class Parser {
             TokenType.MINUS_EQUAL,
             TokenType.PLUS_EQUAL,
             TokenType.STAR_EQUAL,
-            TokenType.SLASH_EQUAL
+            TokenType.SLASH_EQUAL,
+            TokenType.PERCENT_EQUAL
         )) {
             Token equals = previous();
             Expr value = assignment();
@@ -241,6 +242,9 @@ public class Parser {
                     break;
                 case SLASH_EQUAL:
                     prefix = new Token(TokenType.SLASH, "/", equals.file, null, equals.line);
+                    break;
+                case PERCENT_EQUAL:
+                    prefix = new Token(TokenType.PERCENT, "%", equals.file, null, equals.line);
                     break;
                 default:
             }

@@ -84,7 +84,9 @@ public class Scanner{
                 addToken(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
                 break;
             case ':': addToken(TokenType.COLON); break;
-            case '%': addToken(TokenType.PERCENT); break;
+            case '%': 
+                addToken(match('=') ? TokenType.PERCENT_EQUAL : TokenType.PERCENT);
+                break;
             case '|': addToken(TokenType.PIPE); break;
             case '_': addToken(TokenType.UNDERSCORE); break;
             case '!': 

@@ -14,7 +14,7 @@ public enum TokenType {
 
     //Two character tokens.
     PLUS_EQUAL, MINUS_EQUAL,
-    SLASH_EQUAL, STAR_EQUAL,
+    SLASH_EQUAL, STAR_EQUAL, PERCENT_EQUAL,
 
     // Three character tokens.
     ELLIPSES,
