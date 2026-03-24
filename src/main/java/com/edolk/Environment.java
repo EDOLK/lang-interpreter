@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class Environment {
     final Environment enclosing;
+    private final Map<String, Object> values = new HashMap<>();
 
     public Environment() {
         enclosing = null;
@@ -13,8 +14,6 @@ public class Environment {
     Environment(Environment enclosing) {
         this.enclosing = enclosing;
     }
-
-    private final Map<String, Object> values = new HashMap<>();
 
     void define(String name, Object value) {
         values.put(name, value);
@@ -50,7 +49,12 @@ public class Environment {
 
     void assign(Token name, Object value) {
         if (values.containsKey(name.lexeme)) {
-            values.put(name.lexeme, value);
+            Object val = values.get(name.lexeme);
+            if (val != null && val instanceof NeuCallable c1 && value instanceof Callable c2) {
+                values.put(name.lexeme, FunctionSet.combine(c1, c2));
+            } else {
+                values.put(name.lexeme, value);
+            }
             return;
         }
 
@@ -62,4 +66,5 @@ public class Environment {
         throw new RuntimeError(name,
                 "Undefined variable '" + name.lexeme + "'.");
     }
+
 }
