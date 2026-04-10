@@ -1,4 +1,4 @@
-package com.edolk.natives.classes;
+package com.edolk.dt;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -55,6 +55,7 @@ public class Datatables {
             if (d % 1 == 0) {
                 return (int)Math.floor(d);
             }
+            return d;
         } catch (Exception e) {}
         switch (str.trim().toLowerCase()) {
             case "yes":

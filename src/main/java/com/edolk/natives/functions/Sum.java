@@ -35,7 +35,11 @@ public class Sum implements Callable {
     public static double arraySum(Object[] array){
         double sum = 0;
         for (Object object : array) {
-            sum += (double)object;
+            if (object instanceof Number num) {
+                sum += num.doubleValue();
+            } else if (object instanceof String str){
+                sum += Double.valueOf(str);
+            }
         }
         return sum;
     }

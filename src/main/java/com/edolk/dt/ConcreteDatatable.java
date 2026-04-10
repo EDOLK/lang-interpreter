@@ -1,4 +1,4 @@
-package com.edolk.natives.classes;
+package com.edolk.dt;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,32 +8,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ConcreteDatatable implements Datatable{
     public Map<String, List<Object>> map = new LinkedHashMap<>();
-    private int elementLengthLimit = 10;
+    public int elementLengthLimit = 15;
+    public List<String> groups;
 
     @Override
     public Row row(int index){
-        return new Row(this, index);
+        return new Row(index);
     }
 
     @Override
     public Column column(String header){
-        return new Column(this, header);
-    }
-
-    @Override
-    public Map<String, List<Object>> getMap() {
-        return this.map;
+        return new Column(header);
     }
 
     @Override
     public Datatable select(List<String> headers) {
         ConcreteDatatable table = new ConcreteDatatable();
+        table.groups = this.groups;
         for (String header : headers) {
             if (map.containsKey(header)) {
                 table.map.put(header, map.get(header));
@@ -45,11 +41,12 @@ public class ConcreteDatatable implements Datatable{
     @Override
     public Datatable filter(Predicate<Datatable.Row> filter) {
         ConcreteDatatable table = new ConcreteDatatable();
+        table.groups = this.groups;
         OptionalInt maxSize = map.values().stream().mapToInt(Collection::size).max();
         if (maxSize.isPresent()) {
             int size = maxSize.getAsInt();
             for (int i = 0; i < size; i++) {
-                Row row = new Row(this, i);
+                Row row = new Row(i);
                 if (filter.test(row)) {
                     for (String header : this.map.keySet()) {
                         table.map.computeIfPresent(
@@ -73,11 +70,12 @@ public class ConcreteDatatable implements Datatable{
     @Override
     public Datatable map(Function<Datatable.Row, Datatable.Row> mapper) {
         ConcreteDatatable table = new ConcreteDatatable();
+        table.groups = this.groups;
         OptionalInt maxSize = map.values().stream().mapToInt(Collection::size).max();
         if (maxSize.isPresent()) {
             int size = maxSize.getAsInt();
             for (int i = 0; i < size; i++) {
-                Datatable.Row row = new Row(this, i);
+                Datatable.Row row = new Row(i);
                 Datatable.Row newRow = mapper.apply(row);
                 for (String header : this.map.keySet()) {
                     table.map.computeIfPresent(
@@ -99,23 +97,32 @@ public class ConcreteDatatable implements Datatable{
 
     @Override
     public Datatable reduce(List<Reducer> reducers) {
-        ConcreteDatatable table = new ConcreteDatatable();
-        for (Reducer reducer : reducers) {
-            Column column = this.column(reducer.header);
-            table.map.put(reducer.newHeader, new ArrayList<>(List.of(reducer.reductionFunction.apply(column))));
+        if (groups != null) {
+            return groupBy(groups, reducers);
         }
-        return table;
+        ConcreteDatatable dt = new ConcreteDatatable();
+        dt.groups = this.groups;
+        for (Reducer reducer : reducers) {
+            Column column = this.column(reducer.getHeader());
+            List<Object> reduction = new ArrayList<>(List.of(reducer.reduce(column)));
+            dt.map.put(reducer.getNewHeader(), reduction);
+        }
+        return dt;
+    }
+
+    @Override
+    public Datatable groupBy(List<String> headers){
+        this.groups = headers;
+        return this;
     }
 
     @Override
     public Datatable groupBy(List<String> headers, List<Reducer> reducers) {
         ConcreteDatatable dt = new ConcreteDatatable();
+        dt.groups = this.groups;
         List<List<Object>> possibleValues = new ArrayList<>();
         for (String header : headers) {
-            Column column = this.column(header);
-            Set<Object> possibleForHeader = new HashSet<>();
-            possibleForHeader.addAll(column.getObjects());
-            possibleValues.add(new ArrayList<>(possibleForHeader));
+            possibleValues.add(new ArrayList<>(new HashSet<>(this.column(header).getObjects())));
         }
         Slicer slicer = new Slicer(possibleValues);
         while (slicer.hasNext()) {
@@ -137,12 +144,12 @@ public class ConcreteDatatable implements Datatable{
                 dt.map.putIfAbsent(headers.get(i), new ArrayList<>(List.of(values.get(j))));
             }
             for (Reducer reducer : reducers) {
-                Datatable.Column col = filtered.column(reducer.header);
-                dt.map.computeIfPresent(reducer.newHeader, (k,v) -> {
-                    v.add(reducer.reductionFunction.apply(col));
+                Datatable.Column col = filtered.column(reducer.getHeader());
+                dt.map.computeIfPresent(reducer.getNewHeader(), (k,v) -> {
+                    v.add(reducer.reduce(col));
                     return v;
                 });
-                dt.map.putIfAbsent(reducer.newHeader, new ArrayList<>(List.of(reducer.reductionFunction.apply(col))));
+                dt.map.putIfAbsent(reducer.getNewHeader(), new ArrayList<>(List.of(reducer.reduce(col))));
             }
         }
         return dt;
@@ -153,7 +160,7 @@ public class ConcreteDatatable implements Datatable{
         String sep = System.lineSeparator();
         String str = " | ";
         for (String header : this.map.keySet()) {
-            str += toLength(header, elementLengthLimit) + " | ";
+            str += stringify(header, elementLengthLimit) + " | ";
         }
         str += sep;
         str += String.valueOf('-').repeat(str.length());
@@ -166,10 +173,10 @@ public class ConcreteDatatable implements Datatable{
             added = false;
             for (String header : this.map.keySet()) {
                 if (i >= this.map.get(header).size()) {
-                    str += toLength("", elementLengthLimit) + " | ";
+                    str += stringify("", elementLengthLimit) + " | ";
                     continue;
                 }
-                str += toLength(this.map.get(header).get(i).toString(), elementLengthLimit) + " | ";
+                str += stringify(this.map.get(header).get(i), elementLengthLimit) + " | ";
                 added = true;
             }
             if (added) {
@@ -181,28 +188,40 @@ public class ConcreteDatatable implements Datatable{
         return str;
     }
 
-    private String toLength(String str, int l){
-        if (str.length() > l) {
-            return str.substring(0,l);
-        } else if (str.length() < l){
-            int extraNeeded = l - str.length();
-            boolean odd = extraNeeded % 2 != 0;
-            int repeats = (int)Math.floor(extraNeeded/2);
-            str = String.valueOf(' ').repeat(repeats) + str + String.valueOf(' ').repeat(repeats);
-            if (odd) {
-                str += ' ';
+    private String stringify(Object obj, int l){
+        switch (obj) {
+            case Number number -> {
+                return String.format("%" + l + ".2f", number.doubleValue());
             }
-            return str;
+            case String str -> {
+                return String.format("%" + l + "." + l + "s", str);
+            }
+            default -> {
+            }
         }
-        return str;
+        return stringify(obj.toString(), l);
     }
 
+    // private String toLength(String str, int l){
+    //     if (str.length() > l) {
+    //         return str.substring(0,l);
+    //     } else if (str.length() < l){
+    //         int extraNeeded = l - str.length();
+    //         boolean odd = extraNeeded % 2 != 0;
+    //         int repeats = (int)Math.floor(extraNeeded/2);
+    //         str = String.valueOf(' ').repeat(repeats) + str + String.valueOf(' ').repeat(repeats);
+    //         if (odd) {
+    //             str += ' ';
+    //         }
+    //         return str;
+    //     }
+    //     return str;
+    // }
+
     public class Column implements Datatable.Column {
-        private Datatable table;
         private String header;
 
-        public Column(Datatable table, String header) {
-            this.table = table;
+        public Column(String header) {
             this.header = header;
         }
 
@@ -213,22 +232,25 @@ public class ConcreteDatatable implements Datatable{
 
         @Override
         public List<Object> getObjects() {
-            return table.getMap().get(getHeader());
+            return ConcreteDatatable.this.map.get(header);
         }
 
         @Override
         public Object select(int index) {
-            return map.get(header).get(index);
+            return ConcreteDatatable.this.map.get(header).get(index);
+        }
+
+        @Override
+        public Datatable getSource() {
+            return ConcreteDatatable.this;
         }
 
     }
 
     public class Row implements Datatable.Row {
-        private Datatable table;
         private int index;
 
-        public Row(Datatable table, int index) {
-            this.table = table;
+        public Row(int index) {
             this.index = index;
         }
 
@@ -240,7 +262,7 @@ public class ConcreteDatatable implements Datatable{
         @Override
         public List<Object> getObjects() {
             List<Object> objs = new ArrayList<>();
-            for (Entry<String, List<Object>> entry : table.getMap().entrySet()) {
+            for (Entry<String, List<Object>> entry : ConcreteDatatable.this.map.entrySet()) {
                 objs.add(entry.getValue().get(index));
             }
             return objs;
@@ -248,7 +270,12 @@ public class ConcreteDatatable implements Datatable{
 
         @Override
         public Object select(String header) {
-            return map.get(header).get(getIndex());
+            return ConcreteDatatable.this.map.get(header).get(getIndex());
+        }
+
+        @Override
+        public Datatable getSource() {
+            return ConcreteDatatable.this;
         }
     }
 

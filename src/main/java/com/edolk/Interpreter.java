@@ -15,6 +15,7 @@ import com.edolk.natives.classes.NativeDeque;
 import com.edolk.natives.classes.NativeList;
 import com.edolk.natives.classes.NativeMap;
 import com.edolk.natives.classes.NativeQueue;
+import com.edolk.natives.classes.NativeReducer;
 import com.edolk.natives.classes.NativeSet;
 import com.edolk.natives.classes.NativeStack;
 import com.edolk.natives.functions.Clock;
@@ -27,6 +28,11 @@ import com.edolk.natives.functions.Range;
 import com.edolk.natives.functions.Sort;
 import com.edolk.natives.functions.Split;
 import com.edolk.natives.functions.ToString;
+import com.edolk.natives.functions.datatables.Filter;
+import com.edolk.natives.functions.datatables.GroupBy;
+import com.edolk.natives.functions.datatables.Readcsv;
+import com.edolk.natives.functions.datatables.Reduce;
+import com.edolk.natives.functions.datatables.Select;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -44,13 +50,19 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("range", new Range());
         globals.define("split", new Split());
         globals.define("tostring", new ToString());
+        globals.define("random", new Random());
         globals.define("List", new NativeList(false));
         globals.define("Set", new NativeSet(false));
         globals.define("Map", new NativeMap(false));
         globals.define("Stack", new NativeStack(false));
         globals.define("Queue", new NativeQueue(false));
         globals.define("Deque", new NativeDeque(false));
-        globals.define("random", new Random());
+        globals.define("readcsv", new Readcsv());
+        globals.define("Reducer", new NativeReducer());
+        globals.define("select", new Select());
+        globals.define("filter", new Filter());
+        globals.define("reduce", new Reduce());
+        globals.define("groupby", new GroupBy());
     }
 
     void interpret(List<Stmt> statements) {

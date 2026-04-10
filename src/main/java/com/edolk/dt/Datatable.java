@@ -1,7 +1,6 @@
-package com.edolk.natives.classes;
+package com.edolk.dt;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -24,42 +23,36 @@ public interface Datatable {
     public static Datatable reduce(Datatable dt, List<Reducer> reducers){
         return dt.reduce(reducers);
     }
-    public static Datatable groupBy(Datatable dt, List<String> headers, List<Reducer> reducer){
-        return dt.groupBy(headers, reducer);
+    public static Datatable groupBy(Datatable dt, List<String> headers, List<Reducer> reducers){
+        return dt.groupBy(headers, reducers);
     }
-    public Map<String, List<Object>> getMap();
     public Row row(int index);
     public Column column(String header);
     public Datatable select(List<String> headers);
     public Datatable filter(Predicate<Row> filter);
     public Datatable map(Function<Row, Row> mapper);
     public Datatable reduce(List<Reducer> reducers);
-    public Datatable groupBy(List<String> headers, List<Reducer> reducer);
+    public Datatable groupBy(List<String> headers, List<Reducer> reducers);
+    public Datatable groupBy(List<String> headers);
 
     public interface Row {
+        public Datatable getSource();
         public int getIndex();
         public List<Object> getObjects();
         public Object select(String header);
     }
 
     public interface Column {
+        public Datatable getSource();
         public String getHeader();
         public List<Object> getObjects();
         public Object select(int index);
     }
 
-    public class Reducer {
-        public String header;
-        public String newHeader;
-        public Function<Column, Object> reductionFunction;
-        public Reducer(String header, Function<Column, Object> reductionFunction) {
-            this.header = header;
-            this.newHeader = header;
-            this.reductionFunction = reductionFunction;
-        }
-        public Reducer as(String newHeader){
-            this.newHeader = newHeader;
-            return this;
-        }
+    public interface Reducer {
+        public String getHeader();
+        public String getNewHeader();
+        public Object reduce(Column column);
+        public Reducer as(String newHeader);
     }
 }
