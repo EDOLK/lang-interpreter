@@ -279,4 +279,16 @@ public class ConcreteDatatable implements Datatable{
         }
     }
 
+    @Override
+    public int size() {
+        return map.size();
+    }
+
+    @Override
+    public int entrySize() {
+        return map.entrySet().stream()
+            .mapToInt((e) -> e.getValue().size())
+            .sum();
+    }
+
 }

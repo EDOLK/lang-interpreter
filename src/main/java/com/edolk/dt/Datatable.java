@@ -34,6 +34,8 @@ public interface Datatable {
     public Datatable reduce(List<Reducer> reducers);
     public Datatable groupBy(List<String> headers, List<Reducer> reducers);
     public Datatable groupBy(List<String> headers);
+    public int size();
+    public int entrySize();
 
     public interface Row {
         public Datatable getSource();

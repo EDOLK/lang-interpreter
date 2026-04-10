@@ -5,12 +5,13 @@ import java.util.Map;
 
 import com.edolk.Callable;
 import com.edolk.dt.ConcreteDatatable;
+import com.edolk.dt.Datatable;
 
 public class NativeDatatable extends NativeInstance {
 
-    public ConcreteDatatable table = new ConcreteDatatable();
+    public Datatable table = new ConcreteDatatable();
 
-    public NativeDatatable(boolean instance, ConcreteDatatable table) {
+    public NativeDatatable(boolean instance, Datatable table) {
         super(instance);
         this.table = table;
     }
@@ -19,7 +20,7 @@ public class NativeDatatable extends NativeInstance {
         this(instance, new ConcreteDatatable());
     }
 
-    public NativeDatatable(ConcreteDatatable datatable) {
+    public NativeDatatable(Datatable datatable) {
         this(true, datatable);
     }
 
@@ -27,12 +28,10 @@ public class NativeDatatable extends NativeInstance {
     protected Map<String, Object> getProperties() {
         Map<String, Object> map = new HashMap<>();
         map.put("size", Callable.create(0, false, (interpreter, args) -> {
-            return (double)table.map.size();
+            return (double)table.size();
         }));
         map.put("entrySize", Callable.create(0, false, (interpreter, args) -> {
-            return (double)table.map.entrySet().stream()
-                .mapToInt((e) -> e.getValue().size())
-                .sum();
+            return (double)table.entrySize();
         }));
         return map;
     }
