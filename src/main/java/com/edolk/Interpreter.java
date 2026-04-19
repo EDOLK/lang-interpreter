@@ -19,6 +19,12 @@ import com.edolk.natives.classes.NativeReducer;
 import com.edolk.natives.classes.NativeSet;
 import com.edolk.natives.classes.NativeStack;
 import com.edolk.natives.functions.Clock;
+import com.edolk.natives.functions.IsBool;
+import com.edolk.natives.functions.IsCallable;
+import com.edolk.natives.functions.IsTypeOf;
+import com.edolk.natives.functions.IsNil;
+import com.edolk.natives.functions.IsNumber;
+import com.edolk.natives.functions.IsString;
 import com.edolk.natives.functions.Mean;
 import com.edolk.natives.functions.Median;
 import com.edolk.natives.functions.Mode;
@@ -63,6 +69,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("filter", new Filter());
         globals.define("reduce", new Reduce());
         globals.define("groupby", new GroupBy());
+        globals.define("isBool", new IsBool());
+        globals.define("isNum", new IsNumber());
+        globals.define("isStr", new IsString());
+        globals.define("isTypeOf", new IsTypeOf());
+        globals.define("isFunc", new IsCallable());
     }
 
     void interpret(List<Stmt> statements) {

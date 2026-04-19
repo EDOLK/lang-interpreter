@@ -30,5 +30,8 @@ public class Instance {
         return klass.toString() + " instance";
     }
 
-    
+    public Klass getKlass() {
+        return klass;
+    }
+
 }
