@@ -14,6 +14,7 @@ import com.edolk.Stmt.Source;
 import com.edolk.natives.classes.NativeDeque;
 import com.edolk.natives.classes.NativeList;
 import com.edolk.natives.classes.NativeMap;
+import com.edolk.natives.classes.NativeMutator;
 import com.edolk.natives.classes.NativeQueue;
 import com.edolk.natives.classes.NativeReducer;
 import com.edolk.natives.classes.NativeSet;
@@ -30,6 +31,7 @@ import com.edolk.natives.functions.Split;
 import com.edolk.natives.functions.ToString;
 import com.edolk.natives.functions.datatables.Filter;
 import com.edolk.natives.functions.datatables.GroupBy;
+import com.edolk.natives.functions.datatables.Mutate;
 import com.edolk.natives.functions.datatables.Readcsv;
 import com.edolk.natives.functions.datatables.Reduce;
 import com.edolk.natives.functions.datatables.Select;
@@ -59,10 +61,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("Deque", new NativeDeque(false));
         globals.define("readcsv", new Readcsv());
         globals.define("Reducer", new NativeReducer());
+        globals.define("Mutator", new NativeMutator());
         globals.define("select", new Select());
         globals.define("filter", new Filter());
         globals.define("reduce", new Reduce());
         globals.define("groupby", new GroupBy());
+        globals.define("mutate", new Mutate());
     }
 
     void interpret(List<Stmt> statements) {

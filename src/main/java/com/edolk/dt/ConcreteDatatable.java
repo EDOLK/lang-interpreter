@@ -156,6 +156,39 @@ public class ConcreteDatatable implements Datatable{
     }
 
     @Override
+    public Datatable mutate(List<Mutator> mutators) {
+        ConcreteDatatable dt = new ConcreteDatatable();
+        dt.groups = this.groups;
+        for (Entry<String, List<Object>> entry : map.entrySet()) {
+            dt.map.put(entry.getKey(), entry.getValue());
+        }
+        for (Mutator mutator : mutators) {
+            if (dt.map.containsKey(mutator.getHeader())) {
+                List<Object> values = dt.map.get(mutator.getHeader());
+                for (int i = 0; i < values.size(); i++) {
+                    values.set(i, mutator.mutate(row(i)));
+                }
+                if (values.stream()
+                        .allMatch((obj) -> obj == null)
+                   ) {
+                    dt.map.remove(mutator.getHeader());
+                   }
+            } else {
+                List<Object> values = new ArrayList<>();
+                OptionalInt maxSize = map.values().stream().mapToInt(Collection::size).max();
+                if (maxSize.isPresent()) {
+                    int size = maxSize.getAsInt();
+                    for (int i = 0; i < size; i++) {
+                        values.add(mutator.mutate(row(i)));
+                    }
+                }
+                dt.map.put(mutator.getHeader(), values);
+            }
+        }
+        return dt;
+    }
+
+    @Override
     public String toString() {
         String sep = System.lineSeparator();
         String str = " | ";
@@ -189,9 +222,16 @@ public class ConcreteDatatable implements Datatable{
     }
 
     private String stringify(Object obj, int l){
+        if (obj == null) {
+            return stringify("nil", l);
+        }
         switch (obj) {
             case Number number -> {
-                return String.format("%" + l + ".2f", number.doubleValue());
+                double dValue = number.doubleValue();
+                if (dValue % 1 == 0) {
+                    return String.format("%" + l + ".0f", dValue);
+                }
+                return String.format("%" + l + ".2f", dValue);
             }
             case String str -> {
                 return String.format("%" + l + "." + l + "s", str);
