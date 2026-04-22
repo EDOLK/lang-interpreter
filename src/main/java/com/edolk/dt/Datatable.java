@@ -30,6 +30,12 @@ public interface Datatable {
     public static Datatable mutate(Datatable dt, List<Mutator> mutators){
         return dt.mutate(mutators);
     }
+    public static Datatable sortBy(Datatable dt, String header, boolean desc){
+        return dt.sortBy(header, desc);
+    }
+    public static Datatable sortBy(Datatable dt, String header, List<String> order, boolean desc){
+        return dt.sortBy(header, order, desc);
+    }
     public Row row(int index);
     public Column column(String header);
     public Datatable select(List<String> headers);
@@ -39,6 +45,8 @@ public interface Datatable {
     public Datatable groupBy(List<String> headers, List<Reducer> reducers);
     public Datatable groupBy(List<String> headers);
     public Datatable mutate(List<Mutator> mutator);
+    public Datatable sortBy(String header, boolean desc);
+    public Datatable sortBy(String header, List<String> order, boolean desc);
     public int size();
     public int entrySize();
 
