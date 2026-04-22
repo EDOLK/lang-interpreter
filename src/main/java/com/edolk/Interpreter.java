@@ -35,6 +35,8 @@ import com.edolk.natives.functions.datatables.Mutate;
 import com.edolk.natives.functions.datatables.Readcsv;
 import com.edolk.natives.functions.datatables.Reduce;
 import com.edolk.natives.functions.datatables.Select;
+import com.edolk.natives.functions.datatables.SortBy;
+import com.edolk.natives.functions.datatables.SortByDesc;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
@@ -67,6 +69,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("reduce", new Reduce());
         globals.define("groupby", new GroupBy());
         globals.define("mutate", new Mutate());
+        globals.define("sortby", new SortBy());
+        globals.define("sortbydesc", new SortByDesc());
     }
 
     void interpret(List<Stmt> statements) {

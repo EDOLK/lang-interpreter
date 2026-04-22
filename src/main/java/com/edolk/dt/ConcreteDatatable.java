@@ -15,6 +15,9 @@ public class ConcreteDatatable implements Datatable{
     public Map<String, List<Object>> map = new LinkedHashMap<>();
     public int elementLengthLimit = 15;
     public List<String> groups;
+    public String sortHeader = null;
+    public List<String> sortOrder = null;
+    public boolean sortDesc = false;
 
     @Override
     public Row row(int index){
@@ -30,6 +33,9 @@ public class ConcreteDatatable implements Datatable{
     public Datatable select(List<String> headers) {
         ConcreteDatatable table = new ConcreteDatatable();
         table.groups = this.groups;
+        table.sortHeader = this.sortHeader;
+        table.sortOrder = this.sortOrder;
+        table.sortDesc = this.sortDesc;
         for (String header : headers) {
             if (map.containsKey(header)) {
                 table.map.put(header, map.get(header));
@@ -42,6 +48,9 @@ public class ConcreteDatatable implements Datatable{
     public Datatable filter(Predicate<Datatable.Row> filter) {
         ConcreteDatatable table = new ConcreteDatatable();
         table.groups = this.groups;
+        table.sortHeader = this.sortHeader;
+        table.sortOrder = this.sortOrder;
+        table.sortDesc = this.sortDesc;
         OptionalInt maxSize = map.values().stream().mapToInt(Collection::size).max();
         if (maxSize.isPresent()) {
             int size = maxSize.getAsInt();
@@ -71,6 +80,9 @@ public class ConcreteDatatable implements Datatable{
     public Datatable map(Function<Datatable.Row, Datatable.Row> mapper) {
         ConcreteDatatable table = new ConcreteDatatable();
         table.groups = this.groups;
+        table.sortHeader = this.sortHeader;
+        table.sortOrder = this.sortOrder;
+        table.sortDesc = this.sortDesc;
         OptionalInt maxSize = map.values().stream().mapToInt(Collection::size).max();
         if (maxSize.isPresent()) {
             int size = maxSize.getAsInt();
@@ -102,6 +114,9 @@ public class ConcreteDatatable implements Datatable{
         }
         ConcreteDatatable dt = new ConcreteDatatable();
         dt.groups = this.groups;
+        dt.sortHeader = this.sortHeader;
+        dt.sortOrder = this.sortOrder;
+        dt.sortDesc = this.sortDesc;
         for (Reducer reducer : reducers) {
             Column column = this.column(reducer.getHeader());
             List<Object> reduction = new ArrayList<>(List.of(reducer.reduce(column)));
@@ -120,6 +135,9 @@ public class ConcreteDatatable implements Datatable{
     public Datatable groupBy(List<String> headers, List<Reducer> reducers) {
         ConcreteDatatable dt = new ConcreteDatatable();
         dt.groups = this.groups;
+        dt.sortHeader = this.sortHeader;
+        dt.sortOrder = this.sortOrder;
+        dt.sortDesc = this.sortDesc;
         List<List<Object>> possibleValues = new ArrayList<>();
         for (String header : headers) {
             possibleValues.add(new ArrayList<>(new HashSet<>(this.column(header).getObjects())));
@@ -159,6 +177,9 @@ public class ConcreteDatatable implements Datatable{
     public Datatable mutate(List<Mutator> mutators) {
         ConcreteDatatable dt = new ConcreteDatatable();
         dt.groups = this.groups;
+        dt.sortHeader = this.sortHeader;
+        dt.sortOrder = this.sortOrder;
+        dt.sortDesc = this.sortDesc;
         for (Entry<String, List<Object>> entry : map.entrySet()) {
             dt.map.put(entry.getKey(), entry.getValue());
         }
@@ -189,6 +210,67 @@ public class ConcreteDatatable implements Datatable{
     }
 
     @Override
+    public Datatable sortBy(String header, boolean desc) {
+        this.sortHeader = header;
+        this.sortOrder = null;
+        this.sortDesc = desc;
+        return this;
+    }
+ 
+    @Override
+    public Datatable sortBy(String header, List<String> order, boolean desc) {
+        this.sortHeader = header;
+        this.sortOrder = order;
+        return this;
+    }
+
+    // Returns row indices sorted according to sortHeader/sortOrder.
+    // Natural order is used for Comparable types; custom order is used when sortOrder is set.
+    private List<Integer> sortedIndices() {
+        if (sortHeader == null || !map.containsKey(sortHeader)) {
+            // No sort configured — return identity order
+            int size = map.values().stream().mapToInt(List::size).max().orElse(0);
+            List<Integer> indices = new ArrayList<>();
+            for (int i = 0; i < size; i++) indices.add(i);
+            return indices;
+        }
+
+        List<Object> keyCol = map.get(sortHeader);
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < keyCol.size(); i++) indices.add(i);
+
+        final List<String> order = sortOrder;
+        final boolean desc = sortDesc;
+        indices.sort((a, b) -> {
+            Object va = keyCol.get(a);
+            Object vb = keyCol.get(b);
+
+            int cmp;
+            if (order != null) {
+                // Custom string order: unlisted values sort to the end
+                int ia = va instanceof String ? order.indexOf(va) : -1;
+                int ib = vb instanceof String ? order.indexOf(vb) : -1;
+                if (ia == -1) ia = order.size();
+                if (ib == -1) ib = order.size();
+                if (ia != ib) {
+                    cmp = Integer.compare(ia, ib);
+                    return desc ? -cmp : cmp;
+                }
+                // Fall through to natural order for ties / non-string values
+            }
+
+            if (va instanceof Comparable && vb instanceof Comparable) {
+                @SuppressWarnings("unchecked")
+                int naturalCmp = ((Comparable<Object>) va).compareTo(vb);
+                return desc ? -naturalCmp : naturalCmp;
+            }
+            return 0;
+        });
+
+        return indices;
+    }
+
+    @Override
     public String toString() {
         String sep = System.lineSeparator();
         String str = " | ";
@@ -199,25 +281,23 @@ public class ConcreteDatatable implements Datatable{
         str += String.valueOf('-').repeat(str.length());
         str += sep;
         str += " | ";
-        int i = 0;
-        boolean added;
+
+        List<Integer> indices = sortedIndices();
         int lines = 0;
-        do {
-            added = false;
+        for (int i : indices) {
+            if (lines++ >= 10)
+                break;
             for (String header : this.map.keySet()) {
-                if (i >= this.map.get(header).size()) {
+                List<Object> col = this.map.get(header);
+                if (i >= col.size()) {
                     str += stringify("", elementLengthLimit) + " | ";
-                    continue;
+                } else {
+                    str += stringify(col.get(i), elementLengthLimit) + " | ";
                 }
-                str += stringify(this.map.get(header).get(i), elementLengthLimit) + " | ";
-                added = true;
             }
-            if (added) {
-                str += sep;
-                str += " | ";
-            }
-            i++;
-        } while (added && lines++ < 10);
+            str += sep;
+            str += " | ";
+        }
         return str;
     }
 
