@@ -51,11 +51,7 @@ public class Datatables {
 
     public static Object toObj(String str){
         try {
-            Double d = Double.valueOf(str);
-            if (d % 1 == 0) {
-                return (int)Math.floor(d);
-            }
-            return d;
+            return Double.valueOf(str);
         } catch (Exception e) {}
         switch (str.trim().toLowerCase()) {
             case "yes":

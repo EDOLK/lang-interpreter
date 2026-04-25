@@ -23,11 +23,14 @@ import com.edolk.natives.functions.Clock;
 import com.edolk.natives.functions.Mean;
 import com.edolk.natives.functions.Median;
 import com.edolk.natives.functions.Mode;
+import com.edolk.natives.functions.Pow;
 import com.edolk.natives.functions.Print;
 import com.edolk.natives.functions.Random;
 import com.edolk.natives.functions.Range;
+import com.edolk.natives.functions.Root;
 import com.edolk.natives.functions.Sort;
 import com.edolk.natives.functions.Split;
+import com.edolk.natives.functions.Sqrt;
 import com.edolk.natives.functions.ToString;
 import com.edolk.natives.functions.datatables.Filter;
 import com.edolk.natives.functions.datatables.GroupBy;
@@ -71,6 +74,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         globals.define("mutate", new Mutate());
         globals.define("sortby", new SortBy());
         globals.define("sortbydesc", new SortByDesc());
+        globals.define("root", new Root());
+        globals.define("sqrt", new Sqrt());
+        globals.define("pow", new Pow());
     }
 
     void interpret(List<Stmt> statements) {

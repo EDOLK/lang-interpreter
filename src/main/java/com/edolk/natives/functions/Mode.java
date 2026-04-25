@@ -45,8 +45,8 @@ public class Mode implements Callable {
     public static Map<Object, Integer> populateCountMap(Iterable<Object> iterable){
         Map<Object, Integer> countMap = new HashMap<>();
         for (Object object : iterable) {
-            countMap.merge(object, 1, (obj, i) -> {
-                return ++i;
+            countMap.merge(object, 1, (oldVal, newVal) -> {
+                return oldVal + newVal;
             });
         }
         return countMap;
